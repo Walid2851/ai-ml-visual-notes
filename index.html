@@ -37,9 +37,21 @@
   }
   </script>
 
+  <!-- Favicon — inline SVG graph icon, no file needed -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='6' cy='16' r='5' fill='%237C3AED'/><circle cx='26' cy='6' r='5' fill='%237C3AED'/><circle cx='26' cy='26' r='5' fill='%237C3AED'/><line x1='11' y1='14' x2='21' y2='8' stroke='%237C3AED' stroke-width='2'/><line x1='11' y1='18' x2='21' y2='24' stroke='%237C3AED' stroke-width='2'/></svg>" />
+
+  <!-- JetBrains Mono for pseudocode blocks -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" />
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+  <noscript>
+    <style>.noscript-warn{padding:1rem;background:#FEF2F2;color:#991B1B;text-align:center;font-family:sans-serif;border-bottom:2px solid #FCA5A5}</style>
+    <div class="noscript-warn">JavaScript is required to use this site. Please enable it in your browser settings.</div>
+  </noscript>
 
   <!-- NAVBAR -->
   <!-- nav.js will inject the navbar here automatically -->
@@ -132,7 +144,9 @@
 
       grid.innerHTML = list.map(a => `
         <a class="card ${a.done ? '' : 'card--locked'}"
-           href="${a.done ? a.file : '#'}">
+           href="${a.done ? a.file : undefined}"
+           ${!a.done ? 'aria-disabled="true" tabindex="-1"' : ''}
+           ${a.done ? '' : 'onclick="return false"'}>
 
           <div class="card-top">
             <span class="card-topic">${a.topic}</span>
@@ -159,8 +173,14 @@
       });
     });
 
-    // ── 4. First render on page load ───────────────────────────
-    renderCards('all');
+    // ── 4. First render — respect ?cat= URL param from nav links ──
+    const urlCat = new URLSearchParams(location.search).get('cat') || 'all';
+    const activeBtn = document.querySelector(`.filter-btn[data-filter="${urlCat}"]`);
+    if (activeBtn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      activeBtn.classList.add('active');
+    }
+    renderCards(urlCat);
 
   </script>
 
