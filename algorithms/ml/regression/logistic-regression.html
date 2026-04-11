@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Logistic Regression — AI/ML Notes</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+
+    :root { --accent-algo: #F59E0B; }
+
+    .page-content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .section {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .section-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent-algo);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-tag::after {
+      content: '';
+      flex: 1;
+      height: 1.5px;
+      background: color-mix(in srgb, var(--accent-algo) 25%, transparent);
+    }
+
+    .insight-box {
+      border-left: 3px solid var(--accent-algo);
+      background: color-mix(in srgb, var(--accent-algo) 8%, white);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 0.85rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .props-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .props-table th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .props-table td {
+      padding: 0.6rem 0.75rem;
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .props-table td:first-child { font-weight: 600; width: 160px; }
+
+    .pseudocode {
+      background: #1C1C1E;
+      color: #E8E8E8;
+      border-radius: var(--radius-sm);
+      padding: 1.25rem 1.5rem;
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .kw  { color: #CF9DFF; }
+    .fn  { color: #79C0FF; }
+    .cm  { color: #6A737D; font-style: italic; }
+    .num { color: #F97583; }
+
+    /* ── Two-panel simulation layout ── */
+    .sim-panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .sim-panel-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-secondary);
+      margin-bottom: 0.4rem;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-step-manual {
+      border-color: #0D9488;
+      color: #0D9488;
+      font-weight: 600;
+    }
+
+    .btn-step-manual:hover {
+      background: #F0FDFA;
+      border-color: #0D9488;
+      color: #0D9488;
+    }
+
+    .speed-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-left: auto;
+    }
+
+    .controls-hint {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+
+    .legend-line {
+      display: inline-block;
+      width: 18px; height: 3px;
+      margin-right: 4px;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+
+    .svg-canvas {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      width: 100%;
+    }
+
+    .step-log {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-family: "JetBrains Mono", monospace;
+      min-height: 38px;
+    }
+
+    /* Accuracy badge */
+    .accuracy-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .accuracy-track {
+      flex: 1;
+      height: 8px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .accuracy-fill {
+      height: 100%;
+      background: var(--accent-algo);
+      border-radius: 999px;
+      transition: width 0.3s;
+    }
+
+    .accuracy-label {
+      font-weight: 700;
+      color: var(--accent-algo);
+      min-width: 44px;
+      text-align: right;
+    }
+
+    @media (max-width: 640px) {
+      .page-content  { padding: 1rem; gap: 1rem; }
+      .section       { padding: 1.1rem; }
+      .sim-panels    { grid-template-columns: 1fr; }
+      .speed-wrap    { margin-left: 0; width: 100%; }
+      .pseudocode    { font-size: 0.75rem; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <script src="../../../components/nav.js"></script>
+
+  <div class="page-content">
+
+    <!-- ─── THEORY ─────────────────────────────────────────── -->
+    <section class="section">
+      <div class="section-tag">Theory</div>
+
+      <div>
+        <h2>Logistic Regression</h2>
+        <p style="color:var(--text-secondary);margin-top:0.25rem">
+          A binary classification algorithm that predicts the probability that a point belongs to class 1.
+        </p>
+      </div>
+
+      <div class="insight-box">
+        Logistic regression is linear regression with a <strong>sigmoid function</strong> wrapped around the output.
+        Instead of predicting a number, it predicts a probability between 0 and 1.
+        The <strong>decision boundary</strong> is the line where the predicted probability equals 0.5 —
+        anything above goes to class 1, anything below to class 0.
+      </div>
+
+      <table class="props-table">
+        <thead><tr><th>Concept</th><th>Explanation</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Sigmoid σ(z)</td>
+            <td><code>σ(z) = 1 / (1 + e⁻ᶻ)</code> — squashes any value into (0, 1). This is the predicted probability.</td>
+          </tr>
+          <tr>
+            <td>Log-loss</td>
+            <td>The loss function: penalises confident wrong predictions heavily. <code>−[y·log(ŷ) + (1−y)·log(1−ŷ)]</code></td>
+          </tr>
+          <tr>
+            <td>Decision boundary</td>
+            <td>The line where <code>w·x + b = 0</code>, which gives <code>σ = 0.5</code>. Points on one side → class 1, other side → class 0.</td>
+          </tr>
+          <tr>
+            <td>Training</td>
+            <td>Gradient descent on log-loss — same update rule as linear regression but with the sigmoid applied first.</td>
+          </tr>
+          <tr>
+            <td>vs Linear Regression</td>
+            <td>Linear regression predicts a continuous value. Logistic regression predicts a class probability.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ─── ALGORITHM ──────────────────────────────────────── -->
+    <section class="section">
+      <div class="section-tag">Algorithm</div>
+
+      <pre class="pseudocode"><span class="cm">// Binary classification: predict P(y=1 | x) using sigmoid</span>
+
+<span class="fn">sigmoid</span>(z):
+  <span class="kw">return</span> <span class="num">1</span> / (<span class="num">1</span> + exp(−z))
+
+<span class="fn">LogisticRegression</span>(data, α, epochs):
+  w1 ← <span class="num">0</span>,  w2 ← <span class="num">0</span>,  b ← <span class="num">0</span>     <span class="cm">// 2 features + bias</span>
+
+  <span class="kw">for</span> epoch = 1 to epochs:
+    z    ← w1·x1 + w2·x2 + b       <span class="cm">// linear combination</span>
+    ŷ   ← <span class="fn">sigmoid</span>(z)              <span class="cm">// predicted probability</span>
+    err  ← ŷ − y                    <span class="cm">// error (same as linear!)</span>
+
+    loss ← −mean(y·log(ŷ) + (1−y)·log(1−ŷ))   <span class="cm">// log-loss</span>
+
+    dw1 ← mean(err · x1)            <span class="cm">// gradients</span>
+    dw2 ← mean(err · x2)
+    db  ← mean(err)
+
+    w1 ← w1 − α · dw1              <span class="cm">// update weights</span>
+    w2 ← w2 − α · dw2
+    b  ← b  − α · db
+
+  <span class="kw">return</span> w1, w2, b</pre>
+    </section>
+
+    <!-- ─── SIMULATION ─────────────────────────────────────── -->
+    <section class="section">
+      <div class="section-tag">Simulation</div>
+
+      <div class="controls">
+        <button class="btn btn-primary"     id="btn-run">▶ Run All</button>
+        <button class="btn btn-step-manual" id="btn-step">▶ Next Step</button>
+        <button class="btn"                 id="btn-reset">↺ Reset</button>
+        <div class="speed-wrap">
+          <label for="speed-slider">Speed</label>
+          <input type="range" id="speed-slider" min="1" max="5" value="3" />
+        </div>
+      </div>
+
+      <p class="controls-hint">
+        <strong>Left panel</strong>: 2D scatter plot — watch the decision boundary shift as training progresses &nbsp;·&nbsp;
+        <strong>Right panel</strong>: sigmoid curve showing current predicted probabilities
+      </p>
+
+      <div class="legend">
+        <span><span class="legend-dot" style="background:#6366F1"></span>Class 0</span>
+        <span><span class="legend-dot" style="background:#F43F5E"></span>Class 1</span>
+        <span><span class="legend-line" style="background:#F59E0B"></span>Decision boundary</span>
+        <span><span class="legend-line" style="background:#22C55E; opacity:0.6; border-top: 2px dashed #22C55E; background: none;"></span>σ = 0.5 threshold</span>
+      </div>
+
+      <!-- Accuracy progress bar -->
+      <div class="accuracy-bar">
+        <span style="color:var(--text-secondary); font-size:0.85rem">Accuracy</span>
+        <div class="accuracy-track">
+          <div class="accuracy-fill" id="accuracy-fill" style="width:0%"></div>
+        </div>
+        <span class="accuracy-label" id="accuracy-label">0%</span>
+      </div>
+
+      <!-- Two SVG panels side by side -->
+      <div class="sim-panels">
+        <div>
+          <p class="sim-panel-label">Decision boundary (feature space)</p>
+          <svg id="scatter-svg" class="svg-canvas" viewBox="0 0 320 300" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div>
+          <p class="sim-panel-label">Sigmoid output (probability)</p>
+          <svg id="sigmoid-svg" class="svg-canvas" viewBox="0 0 320 300" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+      </div>
+
+      <div id="step-log" class="step-log">Press Next Step or Run All to start.</div>
+    </section>
+
+  </div>
+
+  <script>
+
+    /* ============================================================
+       DATASET — 2-feature binary classification
+       Class 0 (indigo circles): clustered around (-1, -1)
+       Class 1 (rose circles):   clustered around ( 1,  1)
+    ============================================================ */
+    const DATA = [
+      // class 0
+      { x1: -1.5, x2: -1.2, y: 0 }, { x1: -1.0, x2: -1.8, y: 0 },
+      { x1: -0.8, x2: -0.5, y: 0 }, { x1: -1.7, x2: -0.3, y: 0 },
+      { x1: -0.5, x2: -1.4, y: 0 }, { x1: -1.2, x2: -1.0, y: 0 },
+      { x1: -0.3, x2: -0.8, y: 0 }, { x1: -1.9, x2: -1.5, y: 0 },
+      { x1: -0.6, x2: -1.9, y: 0 }, { x1: -1.3, x2: -0.6, y: 0 },
+      // class 1
+      { x1:  1.4, x2:  1.1, y: 1 }, { x1:  0.9, x2:  1.7, y: 1 },
+      { x1:  0.7, x2:  0.4, y: 1 }, { x1:  1.6, x2:  0.2, y: 1 },
+      { x1:  0.4, x2:  1.3, y: 1 }, { x1:  1.1, x2:  0.9, y: 1 },
+      { x1:  0.2, x2:  0.7, y: 1 }, { x1:  1.8, x2:  1.4, y: 1 },
+      { x1:  0.5, x2:  1.8, y: 1 }, { x1:  1.2, x2:  0.5, y: 1 },
+    ];
+
+    const sigmoid = z => 1 / (1 + Math.exp(-z));
+
+    /* ============================================================
+       BUILD STEPS
+    ============================================================ */
+    function buildSteps() {
+      const snaps  = [];
+      const n      = DATA.length;
+      const alpha  = 0.5;
+      const EPOCHS = 60;
+      let w1 = 0, w2 = 0, b = 0;
+
+      snaps.push({ w1, w2, b, loss: null, acc: 0,
+        log: 'Init: w1 = 0, w2 = 0, b = 0 — boundary is undefined.' });
+
+      for (let e = 1; e <= EPOCHS; e++) {
+        let s1 = 0, s2 = 0, sb = 0, lossSum = 0, correct = 0;
+
+        DATA.forEach(({ x1, x2, y }) => {
+          const z    = w1 * x1 + w2 * x2 + b;
+          const yhat = sigmoid(z);
+          const err  = yhat - y;
+          s1      += err * x1;
+          s2      += err * x2;
+          sb      += err;
+          lossSum += -(y * Math.log(yhat + 1e-9) + (1 - y) * Math.log(1 - yhat + 1e-9));
+          correct += (yhat >= 0.5 ? 1 : 0) === y ? 1 : 0;
+        });
+
+        w1 -= alpha * (s1 / n);
+        w2 -= alpha * (s2 / n);
+        b  -= alpha * (sb / n);
+
+        const loss = lossSum / n;
+        const acc  = Math.round((correct / n) * 100);
+
+        if (e <= 6 || e % 5 === 0 || e === EPOCHS) {
+          snaps.push({
+            w1, w2, b, loss, acc,
+            log: `Epoch ${e}: w1=${w1.toFixed(3)}, w2=${w2.toFixed(3)}, b=${b.toFixed(3)}, loss=${loss.toFixed(4)}, acc=${acc}%`,
+          });
+        }
+      }
+
+      return snaps;
+    }
+
+    /* ============================================================
+       SVG HELPERS
+    ============================================================ */
+    const NS = 'http://www.w3.org/2000/svg';
+    const mk = (tag, attrs, text) => {
+      const e = document.createElementNS(NS, tag);
+      Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+      if (text !== undefined) e.textContent = text;
+      return e;
+    };
+
+    /* ── SCATTER SVG layout ─────────────────────────────────── */
+    const SC = { w: 320, h: 300, pad: 35 };
+    const X1_MIN = -2.5, X1_MAX = 2.5;
+    const X2_MIN = -2.5, X2_MAX = 2.5;
+
+    const sx = v => SC.pad + ((v - X1_MIN) / (X1_MAX - X1_MIN)) * (SC.w - 2 * SC.pad);
+    const sy = v => SC.pad + (1 - (v - X2_MIN) / (X2_MAX - X2_MIN)) * (SC.h - 2 * SC.pad);
+
+    function drawScatter(snap) {
+      const svg = document.getElementById('scatter-svg');
+      svg.innerHTML = '';
+
+      // ── Background: color each region by predicted class ────
+      const GRID = 30;
+      const cw   = (SC.w - 2 * SC.pad) / GRID;
+      const ch   = (SC.h - 2 * SC.pad) / GRID;
+
+      for (let i = 0; i < GRID; i++) {
+        for (let j = 0; j < GRID; j++) {
+          const x1v  = X1_MIN + (i / GRID) * (X1_MAX - X1_MIN);
+          const x2v  = X2_MAX - (j / GRID) * (X2_MAX - X2_MIN);
+          const prob = sigmoid(snap.w1 * x1v + snap.w2 * x2v + snap.b);
+          const r = mk('rect', {
+            x: SC.pad + i * cw, y: SC.pad + j * ch,
+            width: cw + 1, height: ch + 1,
+            fill: prob > 0.5 ? '#FFF1F2' : '#EEF2FF',
+            opacity: 0.7,
+          });
+          svg.appendChild(r);
+        }
+      }
+
+      // ── Grid lines ──────────────────────────────────────────
+      [-2,-1,0,1,2].forEach(v => {
+        svg.appendChild(mk('line', { x1: sx(v), y1: SC.pad, x2: sx(v), y2: SC.h - SC.pad,
+          stroke: '#DDD', 'stroke-width': 0.8 }));
+        svg.appendChild(mk('text', { x: sx(v), y: SC.h - SC.pad + 12,
+          'text-anchor': 'middle', 'font-size': 9, fill: '#BBB' }, v));
+
+        svg.appendChild(mk('line', { x1: SC.pad, y1: sy(v), x2: SC.w - SC.pad, y2: sy(v),
+          stroke: '#DDD', 'stroke-width': 0.8 }));
+        svg.appendChild(mk('text', { x: SC.pad - 5, y: sy(v) + 3,
+          'text-anchor': 'end', 'font-size': 9, fill: '#BBB' }, v));
+      });
+
+      // ── Decision boundary: w1·x1 + w2·x2 + b = 0 ───────────
+      // Solve for x2: x2 = -(w1·x1 + b) / w2
+      if (Math.abs(snap.w2) > 0.001) {
+        const x1a = X1_MIN, x1b = X1_MAX;
+        const x2a = -(snap.w1 * x1a + snap.b) / snap.w2;
+        const x2b = -(snap.w1 * x1b + snap.b) / snap.w2;
+        svg.appendChild(mk('line', {
+          x1: sx(x1a), y1: sy(x2a), x2: sx(x1b), y2: sy(x2b),
+          stroke: '#F59E0B', 'stroke-width': 2.5, 'stroke-linecap': 'round',
+        }));
+      }
+
+      // ── Axis labels ─────────────────────────────────────────
+      svg.appendChild(mk('text', { x: SC.w / 2, y: SC.h - 4,
+        'text-anchor': 'middle', 'font-size': 10, fill: '#999' }, 'feature x₁'));
+      const yl = mk('text', { x: 10, y: SC.h / 2,
+        'text-anchor': 'middle', 'font-size': 10, fill: '#999',
+        transform: `rotate(-90,10,${SC.h / 2})` }, 'feature x₂');
+      svg.appendChild(yl);
+
+      // ── Data points ─────────────────────────────────────────
+      DATA.forEach(({ x1, x2, y }) => {
+        const prob    = sigmoid(snap.w1 * x1 + snap.w2 * x2 + snap.b);
+        const correct = (prob >= 0.5 ? 1 : 0) === y;
+        svg.appendChild(mk('circle', {
+          cx: sx(x1), cy: sy(x2), r: 6,
+          fill: y === 0 ? '#6366F1' : '#F43F5E',
+          stroke: correct ? '#fff' : '#1A1A1A',
+          'stroke-width': correct ? 1.5 : 2.5,
+        }));
+      });
+    }
+
+    /* ── SIGMOID SVG layout ─────────────────────────────────── */
+    const SG = { w: 320, h: 300, padL: 45, padR: 20, padT: 25, padB: 40 };
+    const Z_MIN = -6, Z_MAX = 6;
+
+    const zgx = z => SG.padL + ((z - Z_MIN) / (Z_MAX - Z_MIN)) * (SG.w - SG.padL - SG.padR);
+    const sgy = p => SG.padT + (1 - p) * (SG.h - SG.padT - SG.padB);
+
+    function drawSigmoid(snap) {
+      const svg = document.getElementById('sigmoid-svg');
+      svg.innerHTML = '';
+
+      // ── Grid ────────────────────────────────────────────────
+      [0, 0.25, 0.5, 0.75, 1].forEach(p => {
+        svg.appendChild(mk('line', { x1: SG.padL, y1: sgy(p), x2: SG.w - SG.padR, y2: sgy(p),
+          stroke: p === 0.5 ? '#F59E0B' : '#E5E7EB',
+          'stroke-width': p === 0.5 ? 1.5 : 0.8,
+          'stroke-dasharray': p === 0.5 ? '4 3' : 'none' }));
+        svg.appendChild(mk('text', { x: SG.padL - 5, y: sgy(p) + 4,
+          'text-anchor': 'end', 'font-size': 9, fill: p === 0.5 ? '#F59E0B' : '#BBB' }, p));
+      });
+
+      [-4,-2,0,2,4].forEach(z => {
+        svg.appendChild(mk('line', { x1: zgx(z), y1: SG.padT, x2: zgx(z), y2: SG.h - SG.padB,
+          stroke: '#E5E7EB', 'stroke-width': 0.8 }));
+        svg.appendChild(mk('text', { x: zgx(z), y: SG.h - SG.padB + 14,
+          'text-anchor': 'middle', 'font-size': 9, fill: '#BBB' }, z));
+      });
+
+      // ── Sigmoid curve ────────────────────────────────────────
+      let d = '';
+      for (let i = 0; i <= 200; i++) {
+        const z = Z_MIN + (i / 200) * (Z_MAX - Z_MIN);
+        const p = sigmoid(z);
+        const x = zgx(z), y = sgy(p);
+        d += i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
+      }
+      svg.appendChild(mk('path', { d, stroke: '#F59E0B', 'stroke-width': 2.5, fill: 'none' }));
+
+      // ── Data points projected onto z = w·x + b ───────────────
+      DATA.forEach(({ x1, x2, y }) => {
+        const z    = snap.w1 * x1 + snap.w2 * x2 + snap.b;
+        const prob = sigmoid(z);
+        const zClamped = Math.max(Z_MIN, Math.min(Z_MAX, z));
+        svg.appendChild(mk('circle', {
+          cx: zgx(zClamped), cy: sgy(prob), r: 5,
+          fill: y === 0 ? '#6366F1' : '#F43F5E',
+          stroke: '#fff', 'stroke-width': 1.5, opacity: 0.85,
+        }));
+      });
+
+      // ── Axis labels ──────────────────────────────────────────
+      svg.appendChild(mk('text', { x: SG.padL + (SG.w - SG.padL - SG.padR) / 2, y: SG.h - 6,
+        'text-anchor': 'middle', 'font-size': 10, fill: '#999' }, 'z = w·x + b'));
+      const yl = mk('text', { x: 10, y: SG.h / 2,
+        'text-anchor': 'middle', 'font-size': 10, fill: '#999',
+        transform: `rotate(-90,10,${SG.h / 2})` }, 'σ(z)  probability');
+      svg.appendChild(yl);
+    }
+
+    /* ============================================================
+       CONTROLS
+    ============================================================ */
+    let steps     = [];
+    let stepIndex = -1;
+    let runTimer  = null;
+
+    function stepDelay() {
+      const v = document.getElementById('speed-slider').value;
+      return [600, 350, 200, 100, 40][v - 1];
+    }
+
+    function stopRun() {
+      if (runTimer) { clearInterval(runTimer); runTimer = null; }
+      document.getElementById('btn-run').textContent = '▶ Run All';
+    }
+
+    function updateAccuracy(snap) {
+      const pct = snap.acc || 0;
+      document.getElementById('accuracy-fill').style.width  = pct + '%';
+      document.getElementById('accuracy-label').textContent = pct + '%';
+    }
+
+    function renderStep(idx) {
+      const snap = steps[idx];
+      drawScatter(snap);
+      drawSigmoid(snap);
+      updateAccuracy(snap);
+      document.getElementById('step-log').textContent = snap.log;
+    }
+
+    function resetSim() {
+      stopRun();
+      stepIndex = 0;
+      steps = buildSteps();
+      renderStep(0);
+    }
+
+    document.getElementById('btn-step').addEventListener('click', () => {
+      stopRun();
+      if (stepIndex < steps.length - 1) {
+        stepIndex++;
+        renderStep(stepIndex);
+      }
+    });
+
+    document.getElementById('btn-run').addEventListener('click', () => {
+      if (runTimer) { stopRun(); return; }
+      document.getElementById('btn-run').textContent = '⏸ Pause';
+      if (stepIndex >= steps.length - 1) resetSim();
+      runTimer = setInterval(() => {
+        stepIndex++;
+        renderStep(stepIndex);
+        if (stepIndex >= steps.length - 1) stopRun();
+      }, stepDelay());
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', resetSim);
+
+    // ── Init ──────────────────────────────────────────────────
+    resetSim();
+
+  </script>
+
+</body>
+</html>

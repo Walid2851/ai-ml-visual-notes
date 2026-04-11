@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linear & Polynomial Regression — AI/ML Notes</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+
+    :root { --accent-algo: #8B5CF6; }
+
+    /* ── Two-column layout ── */
+    .page-layout {
+      display: flex;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 160px;
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1.5px solid var(--border);
+      padding: 1.5rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      position: sticky;
+      top: 56px;
+      height: calc(100vh - 56px);
+      overflow-y: auto;
+    }
+
+    .sidebar-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      padding-left: 0.5rem;
+    }
+
+    .algo-pill {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .algo-pill:hover { background: var(--bg); color: var(--text-primary); }
+
+    .algo-pill.active {
+      background: color-mix(in srgb, var(--accent-algo) 12%, white);
+      border-color: var(--accent-algo);
+      color: var(--accent-algo);
+    }
+
+    /* ── Content ── */
+    .content {
+      flex: 1;
+      padding: 2rem;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ── Section card ── */
+    .section {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .section-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent-algo);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-tag::after {
+      content: '';
+      flex: 1;
+      height: 1.5px;
+      background: color-mix(in srgb, var(--accent-algo) 25%, transparent);
+    }
+
+    .insight-box {
+      border-left: 3px solid var(--accent-algo);
+      background: color-mix(in srgb, var(--accent-algo) 8%, white);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 0.85rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .props-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .props-table th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .props-table td {
+      padding: 0.6rem 0.75rem;
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .props-table td:first-child { font-weight: 600; width: 150px; }
+
+    .pseudocode {
+      background: #1C1C1E;
+      color: #E8E8E8;
+      border-radius: var(--radius-sm);
+      padding: 1.25rem 1.5rem;
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .kw  { color: #CF9DFF; }
+    .fn  { color: #79C0FF; }
+    .cm  { color: #6A737D; font-style: italic; }
+    .num { color: #F97583; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-step-manual {
+      border-color: #0D9488;
+      color: #0D9488;
+      font-weight: 600;
+    }
+
+    .btn-step-manual:hover {
+      background: #F0FDFA;
+      border-color: #0D9488;
+      color: #0D9488;
+    }
+
+    .controls-hint {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .speed-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-left: auto;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+
+    .legend-line {
+      display: inline-block;
+      width: 18px; height: 3px;
+      margin-right: 4px;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+
+    /* ── SVG ── */
+    #graph-svg {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+    }
+
+    /* ── Step log ── */
+    .step-log {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-family: "JetBrains Mono", monospace;
+      min-height: 38px;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+      .page-layout  { flex-direction: column; }
+      .sidebar {
+        width: 100%; height: auto; flex-direction: row;
+        flex-wrap: nowrap; overflow-x: auto;
+        position: static; border-right: none;
+        border-bottom: 1.5px solid var(--border);
+        padding: 0.6rem 0.75rem;
+      }
+      .sidebar-label { display: none; }
+      .algo-pill { width: auto; white-space: nowrap; flex-shrink: 0; }
+      .content   { padding: 1rem; gap: 1rem; }
+      .section   { padding: 1.1rem; }
+      .speed-wrap { margin-left: 0; width: 100%; }
+      .pseudocode { font-size: 0.75rem; }
+      #graph-svg  { height: 260px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <script src="../../../components/nav.js"></script>
+
+  <div class="page-layout">
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar">
+      <p class="sidebar-label">Model</p>
+      <button class="algo-pill active" data-algo="linear">Linear</button>
+      <button class="algo-pill"        data-algo="poly">Polynomial</button>
+    </aside>
+
+    <!-- ── CONTENT ── -->
+    <main class="content">
+
+      <!-- THEORY -->
+      <section class="section">
+        <div class="section-tag">Theory</div>
+        <div id="theory-title">
+          <h2></h2>
+          <p class="subtitle" style="color:var(--text-secondary);margin-top:0.25rem"></p>
+        </div>
+        <div id="theory-insight" class="insight-box"></div>
+        <table class="props-table">
+          <thead><tr><th>Property</th><th>Value</th></tr></thead>
+          <tbody id="theory-body"></tbody>
+        </table>
+      </section>
+
+      <!-- ALGORITHM -->
+      <section class="section">
+        <div class="section-tag">Algorithm</div>
+        <pre id="pseudocode" class="pseudocode"></pre>
+      </section>
+
+      <!-- SIMULATION -->
+      <section class="section">
+        <div class="section-tag">Simulation</div>
+
+        <div class="controls">
+          <button class="btn btn-primary"      id="btn-run">▶ Run All</button>
+          <button class="btn btn-step-manual"  id="btn-step">▶ Next Step</button>
+          <button class="btn"                  id="btn-reset">↺ Reset</button>
+          <div class="speed-wrap">
+            <label for="speed-slider">Speed</label>
+            <input type="range" id="speed-slider" min="1" max="5" value="3" />
+          </div>
+        </div>
+
+        <p class="controls-hint">
+          <strong>▶ Run All</strong> plays the full gradient descent training &nbsp;·&nbsp;
+          <strong>▶ Next Step</strong> advances one epoch at a time
+        </p>
+
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#6366F1"></span>Data points</span>
+          <span><span class="legend-line" style="background:var(--accent-algo)"></span>Current fit</span>
+          <span><span class="legend-line" style="background:#22C55E; opacity:0.6"></span>True function</span>
+        </div>
+
+        <svg id="graph-svg" viewBox="0 0 680 380" width="100%" xmlns="http://www.w3.org/2000/svg"></svg>
+
+        <div id="step-log" class="step-log">Press Next Step or Run All to start.</div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+
+    /* ============================================================
+       DATASET — fixed points sampled from y = 2x + 1 + noise
+       x ∈ [-2, 2], same data used for both linear and polynomial
+    ============================================================ */
+    const RAW_DATA = [
+      { x: -2.0, y: -2.8 }, { x: -1.7, y: -2.1 }, { x: -1.4, y: -1.6 },
+      { x: -1.1, y: -1.0 }, { x: -0.8, y:  0.1 }, { x: -0.5, y:  0.3 },
+      { x: -0.2, y:  0.8 }, { x:  0.1, y:  1.5 }, { x:  0.4, y:  1.9 },
+      { x:  0.7, y:  2.4 }, { x:  1.0, y:  3.2 }, { x:  1.3, y:  3.5 },
+      { x:  1.6, y:  4.4 }, { x:  1.9, y:  5.1 }, { x:  2.0, y:  4.8 },
+    ];
+
+    /* ============================================================
+       SVG LAYOUT
+    ============================================================ */
+    const SVG_W = 680, SVG_H = 380;
+    const PAD   = { top: 30, right: 30, bottom: 45, left: 55 };
+    const PW    = SVG_W - PAD.left - PAD.right;
+    const PH    = SVG_H - PAD.top  - PAD.bottom;
+
+    const X_MIN = -2.4, X_MAX = 2.4;
+    const Y_MIN = -4.5, Y_MAX = 7.0;
+
+    const px = x => PAD.left + ((x - X_MIN) / (X_MAX - X_MIN)) * PW;
+    const py = y => PAD.top  + (1 - (y - Y_MIN) / (Y_MAX - Y_MIN)) * PH;
+
+    const NS = 'http://www.w3.org/2000/svg';
+    const el = (tag, attrs, text) => {
+      const e = document.createElementNS(NS, tag);
+      Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+      if (text !== undefined) e.textContent = text;
+      return e;
+    };
+
+    /* ============================================================
+       ALGORITHM DEFINITIONS
+    ============================================================ */
+    const ALGOS = {
+
+      linear: {
+        name:     'Linear Regression',
+        subtitle: 'Fits a straight line y = wx + b to the data using gradient descent.',
+        accent:   '#8B5CF6',
+        insight:  'Linear regression finds the line that <strong>minimises the sum of squared vertical distances</strong> from each data point to the line. Gradient descent iteratively nudges the slope <em>w</em> and intercept <em>b</em> to reduce this error.',
+        props: [
+          { name: 'Model',      value: 'y = wx + b' },
+          { name: 'Parameters', value: 'w (slope), b (intercept)' },
+          { name: 'Loss',       value: 'MSE = (1/n) Σ (ŷᵢ − yᵢ)²' },
+          { name: 'Works best', value: 'When the true relationship between x and y is linear' },
+          { name: 'Limitation', value: 'Cannot fit curves — use polynomial regression instead' },
+        ],
+        pseudocode:
+`<span class="cm">// Fit y = w·x + b  by minimising MSE via gradient descent</span>
+
+<span class="fn">LinearRegression</span>(data, α, epochs):
+  w ← <span class="num">0</span>,  b ← <span class="num">0</span>         <span class="cm">// initialise parameters</span>
+
+  <span class="kw">for</span> epoch = 1 to epochs:
+    ŷ       ← w·x + b           <span class="cm">// predictions for all points</span>
+    error   ← ŷ − y             <span class="cm">// residuals</span>
+    loss    ← mean(error²)      <span class="cm">// MSE</span>
+
+    dw ← mean(error · x)        <span class="cm">// gradient w.r.t. w</span>
+    db ← mean(error)            <span class="cm">// gradient w.r.t. b</span>
+
+    w  ← w − α · dw             <span class="cm">// update slope</span>
+    b  ← b − α · db             <span class="cm">// update intercept</span>
+
+  <span class="kw">return</span> w, b`,
+      },
+
+      poly: {
+        name:     'Polynomial Regression',
+        subtitle: 'Fits a curve y = w₀ + w₁x + w₂x² using the same gradient descent approach.',
+        accent:   '#EC4899',
+        insight:  'Polynomial regression is linear regression in disguise — we add <strong>x² as a new feature</strong>. The model is still linear in the parameters (w₀, w₁, w₂), so gradient descent works exactly the same way, but now the fit can be a curve.',
+        props: [
+          { name: 'Model',      value: 'y = w₀ + w₁x + w₂x²' },
+          { name: 'Parameters', value: 'w₀ (intercept), w₁ (linear), w₂ (quadratic)' },
+          { name: 'Loss',       value: 'MSE = (1/n) Σ (ŷᵢ − yᵢ)²' },
+          { name: 'Works best', value: 'When data has a curved trend' },
+          { name: 'Risk',       value: 'Higher degree polynomials can overfit — memorise noise' },
+        ],
+        pseudocode:
+`<span class="cm">// Fit y = w0 + w1·x + w2·x²  by minimising MSE</span>
+
+<span class="fn">PolynomialRegression</span>(data, α, epochs):
+  w0 ← <span class="num">0</span>,  w1 ← <span class="num">0</span>,  w2 ← <span class="num">0</span>
+
+  <span class="kw">for</span> epoch = 1 to epochs:
+    ŷ     ← w0 + w1·x + w2·x²  <span class="cm">// predictions</span>
+    error ← ŷ − y
+
+    dw0 ← mean(error)           <span class="cm">// gradient w.r.t. w0</span>
+    dw1 ← mean(error · x)       <span class="cm">// gradient w.r.t. w1</span>
+    dw2 ← mean(error · x²)      <span class="cm">// gradient w.r.t. w2</span>
+
+    w0 ← w0 − α · dw0
+    w1 ← w1 − α · dw1
+    w2 ← w2 − α · dw2
+
+  <span class="kw">return</span> w0, w1, w2`,
+      },
+    };
+
+    /* ============================================================
+       BUILD STEPS — pre-compute gradient descent training
+    ============================================================ */
+    function buildSteps(algoKey) {
+      const snaps = [];
+      const data  = RAW_DATA;
+      const n     = data.length;
+      const alpha = algoKey === 'linear' ? 0.15 : 0.08;
+      const EPOCHS = 80;
+
+      if (algoKey === 'linear') {
+        let w = 0, b = 0;
+
+        snaps.push({ params: { w, b }, log: `Init: w = 0.000, b = 0.000` });
+
+        for (let e = 1; e <= EPOCHS; e++) {
+          let sumErr = 0, sumErrX = 0, sumLoss = 0;
+          data.forEach(({ x, y }) => {
+            const yhat = w * x + b;
+            const err  = yhat - y;
+            sumErr  += err;
+            sumErrX += err * x;
+            sumLoss += err * err;
+          });
+          const dw   = sumErrX / n;
+          const db   = sumErr  / n;
+          const loss = sumLoss / n;
+          w -= alpha * dw;
+          b -= alpha * db;
+
+          if (e % 5 === 0 || e <= 5 || e === EPOCHS) {
+            snaps.push({
+              params: { w, b },
+              log: `Epoch ${e}: w = ${w.toFixed(3)}, b = ${b.toFixed(3)}, MSE = ${loss.toFixed(4)}`,
+            });
+          }
+        }
+
+      } else {
+        let w0 = 0, w1 = 0, w2 = 0;
+
+        snaps.push({ params: { w0, w1, w2 }, log: `Init: w0 = 0, w1 = 0, w2 = 0` });
+
+        for (let e = 1; e <= EPOCHS; e++) {
+          let s0 = 0, s1 = 0, s2 = 0, sumLoss = 0;
+          data.forEach(({ x, y }) => {
+            const yhat = w0 + w1 * x + w2 * x * x;
+            const err  = yhat - y;
+            s0       += err;
+            s1       += err * x;
+            s2       += err * x * x;
+            sumLoss  += err * err;
+          });
+          const loss = sumLoss / n;
+          w0 -= alpha * (s0 / n);
+          w1 -= alpha * (s1 / n);
+          w2 -= alpha * (s2 / n);
+
+          if (e % 5 === 0 || e <= 5 || e === EPOCHS) {
+            snaps.push({
+              params: { w0, w1, w2 },
+              log: `Epoch ${e}: w0=${w0.toFixed(3)}, w1=${w1.toFixed(3)}, w2=${w2.toFixed(3)}, MSE=${loss.toFixed(4)}`,
+            });
+          }
+        }
+      }
+
+      return snaps;
+    }
+
+    /* ============================================================
+       DRAW FRAME
+    ============================================================ */
+    function drawFrame(snap, algoKey) {
+      const svg = document.getElementById('graph-svg');
+      svg.innerHTML = '';
+
+      const accent = ALGOS[algoKey].accent;
+
+      // ── Grid lines ──────────────────────────────────────────
+      [-4,-2,0,2,4,6].forEach(v => {
+        svg.appendChild(el('line', {
+          x1: PAD.left, y1: py(v), x2: PAD.left + PW, y2: py(v),
+          stroke: '#E5E7EB', 'stroke-width': 1,
+        }));
+        svg.appendChild(el('text', {
+          x: PAD.left - 6, y: py(v) + 4,
+          'text-anchor': 'end', 'font-size': 10, fill: '#AAA',
+        }, v));
+      });
+
+      [-2,-1,0,1,2].forEach(v => {
+        svg.appendChild(el('line', {
+          x1: px(v), y1: PAD.top, x2: px(v), y2: PAD.top + PH,
+          stroke: '#E5E7EB', 'stroke-width': 1,
+        }));
+        svg.appendChild(el('text', {
+          x: px(v), y: PAD.top + PH + 16,
+          'text-anchor': 'middle', 'font-size': 10, fill: '#AAA',
+        }, v));
+      });
+
+      // ── Axes ────────────────────────────────────────────────
+      svg.appendChild(el('line', { x1: PAD.left, y1: py(0), x2: PAD.left + PW, y2: py(0), stroke: '#CCC', 'stroke-width': 1 }));
+      svg.appendChild(el('line', { x1: px(0), y1: PAD.top, x2: px(0), y2: PAD.top + PH, stroke: '#CCC', 'stroke-width': 1 }));
+
+      // Axis labels
+      const yl = el('text', { x: 14, y: PAD.top + PH / 2, 'text-anchor': 'middle', 'font-size': 11, fill: '#999',
+        transform: `rotate(-90,14,${PAD.top + PH / 2})` }, 'y');
+      svg.appendChild(yl);
+      svg.appendChild(el('text', { x: PAD.left + PW / 2, y: SVG_H - 6, 'text-anchor': 'middle', 'font-size': 11, fill: '#999' }, 'x'));
+
+      // ── True function: y = 2x + 1 (green dashed) ────────────
+      const trueX1 = X_MIN, trueX2 = X_MAX;
+      svg.appendChild(el('line', {
+        x1: px(trueX1), y1: py(2 * trueX1 + 1),
+        x2: px(trueX2), y2: py(2 * trueX2 + 1),
+        stroke: '#22C55E', 'stroke-width': 1.5,
+        'stroke-dasharray': '5 4', opacity: 0.55,
+      }));
+
+      // ── Current fit line / curve ─────────────────────────────
+      const STEPS = 120;
+      let fitPath = '';
+      for (let i = 0; i <= STEPS; i++) {
+        const x = X_MIN + (i / STEPS) * (X_MAX - X_MIN);
+        let y;
+        if (algoKey === 'linear') {
+          const { w, b } = snap.params;
+          y = w * x + b;
+        } else {
+          const { w0, w1, w2 } = snap.params;
+          y = w0 + w1 * x + w2 * x * x;
+        }
+        const sx = px(x), sy = py(y);
+        fitPath += i === 0 ? `M ${sx} ${sy}` : ` L ${sx} ${sy}`;
+      }
+      svg.appendChild(el('path', { d: fitPath, stroke: accent, 'stroke-width': 2.5, fill: 'none' }));
+
+      // ── Residual lines (error per point) ─────────────────────
+      RAW_DATA.forEach(({ x, y }) => {
+        let yhat;
+        if (algoKey === 'linear') {
+          const { w, b } = snap.params;
+          yhat = w * x + b;
+        } else {
+          const { w0, w1, w2 } = snap.params;
+          yhat = w0 + w1 * x + w2 * x * x;
+        }
+        svg.appendChild(el('line', {
+          x1: px(x), y1: py(y), x2: px(x), y2: py(yhat),
+          stroke: accent, 'stroke-width': 1, opacity: 0.3,
+        }));
+      });
+
+      // ── Data points ──────────────────────────────────────────
+      RAW_DATA.forEach(({ x, y }) => {
+        svg.appendChild(el('circle', {
+          cx: px(x), cy: py(y), r: 5,
+          fill: '#6366F1', stroke: '#fff', 'stroke-width': 1.5,
+        }));
+      });
+
+      // ── Step log ─────────────────────────────────────────────
+      document.getElementById('step-log').textContent = snap.log;
+    }
+
+    /* ============================================================
+       UI — load algorithm content
+    ============================================================ */
+    function loadAlgo(key) {
+      const a = ALGOS[key];
+      document.documentElement.style.setProperty('--accent-algo', a.accent);
+      document.querySelector('#theory-title h2').textContent          = a.name;
+      document.querySelector('#theory-title .subtitle').textContent   = a.subtitle;
+      document.getElementById('theory-insight').innerHTML             = a.insight;
+      document.getElementById('theory-body').innerHTML = a.props.map(p =>
+        `<tr><td>${p.name}</td><td>${p.value}</td></tr>`).join('');
+      document.getElementById('pseudocode').innerHTML = a.pseudocode;
+      currentAlgo = key;
+      resetSim();
+    }
+
+    document.querySelectorAll('.algo-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.algo-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        loadAlgo(pill.dataset.algo);
+      });
+    });
+
+    /* ============================================================
+       SIMULATION CONTROLS
+    ============================================================ */
+    let steps       = [];
+    let stepIndex   = -1;
+    let runTimer    = null;
+    let currentAlgo = 'linear';
+
+    function stepDelay() {
+      const v = document.getElementById('speed-slider').value;
+      return [600, 350, 200, 100, 40][v - 1];
+    }
+
+    function stopRun() {
+      if (runTimer) { clearInterval(runTimer); runTimer = null; }
+      document.getElementById('btn-run').textContent = '▶ Run All';
+    }
+
+    function resetSim() {
+      stopRun();
+      stepIndex = 0;
+      steps = buildSteps(currentAlgo);
+      drawFrame(steps[0], currentAlgo);
+    }
+
+    document.getElementById('btn-step').addEventListener('click', () => {
+      stopRun();
+      if (stepIndex < steps.length - 1) {
+        stepIndex++;
+        drawFrame(steps[stepIndex], currentAlgo);
+      }
+    });
+
+    document.getElementById('btn-run').addEventListener('click', () => {
+      if (runTimer) { stopRun(); return; }
+      document.getElementById('btn-run').textContent = '⏸ Pause';
+      if (stepIndex >= steps.length - 1) resetSim();
+      runTimer = setInterval(() => {
+        stepIndex++;
+        drawFrame(steps[stepIndex], currentAlgo);
+        if (stepIndex >= steps.length - 1) stopRun();
+      }, stepDelay());
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', resetSim);
+
+    // ── Init ────────────────────────────────────────────────────
+    loadAlgo('linear');
+
+  </script>
+
+</body>
+</html>
