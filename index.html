@@ -89,9 +89,8 @@
           <h3 class="card-title">${a.title}</h3>
           <p class="card-desc">${a.description}</p>
 
-          <div class="card-footer">
-            <span class="card-week">Week ${a.week}</span>
-            ${a.done ? '<span class="card-status done">Done</span>' : '<span class="card-status">Coming soon</span>'}
+          <div class="card-cta">
+            ${a.done ? '<span class="card-cta-link">Explore →</span>' : '<span class="card-cta-soon">Coming soon</span>'}
           </div>
 
         </a>
