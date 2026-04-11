@@ -235,6 +235,26 @@
       color: #fff;
     }
 
+    /* Next Step button — teal outline to stand out from Run */
+    .btn-step-manual {
+      border-color: #0D9488;
+      color: #0D9488;
+      font-weight: 600;
+    }
+
+    .btn-step-manual:hover {
+      background: #F0FDFA;
+      border-color: #0D9488;
+      color: #0D9488;
+    }
+
+    /* Controls hint line */
+    .controls-hint {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
     /* Hint bar shown during edit mode */
     .edit-hint {
       background: #FFFBEB;
@@ -325,9 +345,9 @@
 
           <!-- These hide in edit mode -->
           <span id="run-controls">
-            <button class="btn btn-primary" id="btn-run">▶ Run</button>
-            <button class="btn" id="btn-step">Step</button>
-            <button class="btn" id="btn-reset">Reset</button>
+            <button class="btn btn-primary" id="btn-run">▶ Run All</button>
+            <button class="btn btn-step-manual" id="btn-step">▶ Next Step</button>
+            <button class="btn" id="btn-reset">↺ Reset</button>
           </span>
 
           <div class="speed-wrap">
@@ -335,6 +355,12 @@
             <input type="range" id="speed-slider" min="1" max="5" value="3" />
           </div>
         </div>
+
+        <!-- Controls hint (always visible in run mode) -->
+        <p class="controls-hint">
+          <strong>▶ Run All</strong> plays the full algorithm automatically &nbsp;·&nbsp;
+          <strong>▶ Next Step</strong> advances one step at a time so you can follow along
+        </p>
 
         <!-- Edit mode hint bar (hidden in run mode) -->
         <div id="edit-hint" class="edit-hint" style="display:none">
