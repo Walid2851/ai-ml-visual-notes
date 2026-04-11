@@ -294,3 +294,33 @@ p  { color: var(--text-secondary); }
   color: #2E7D32;
   font-weight: 600;
 }
+
+/* ============================================================
+   MOBILE — shared (applies to all pages)
+   ============================================================ */
+@media (max-width: 640px) {
+
+  /* Smaller container padding on narrow screens */
+  .container {
+    padding: 1rem;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 1.5rem 0 1rem;
+  }
+
+  h1 { font-size: 1.6rem; }
+
+  /* Cards fill full width, single column */
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Filter bar scrolls horizontally if needed */
+  .filter-bar {
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    flex-wrap: nowrap;
+  }
+}
