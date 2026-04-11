@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://walid2851.github.io/ai-ml-visual-notes/</loc>
+    <priority>1.0</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://walid2851.github.io/ai-ml-visual-notes/algorithms/ai/search/bfs-dfs-astar.html</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/regression/gradient-descent.html</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/regression/linear-regression.html</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/regression/logistic-regression.html</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+</urlset>

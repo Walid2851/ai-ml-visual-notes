@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://walid2851.github.io/ai-ml-visual-notes/sitemap.xml
