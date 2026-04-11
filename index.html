@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI / ML Visual Notes</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <!-- nav.js will inject the navbar here automatically -->
+  <script src="components/nav.js"></script>
+
+  <!-- MAIN CONTENT -->
+  <main class="container">
+
+    <!-- Hero text -->
+    <div class="hero">
+      <h1>AI / ML Visual Notes</h1>
+      <p>Pick an algorithm to explore it step by step.</p>
+    </div>
+
+    <!-- Filter pills: All / AI / ML -->
+    <div class="filter-bar">
+      <button class="btn filter-btn active" data-filter="all">All</button>
+      <button class="btn filter-btn" data-filter="ai">AI</button>
+      <button class="btn filter-btn" data-filter="ml">ML</button>
+    </div>
+
+    <!-- JS fills this with cards -->
+    <div id="card-grid" class="card-grid"></div>
+
+  </main>
+
+  <!-- PAGE SCRIPT -->
+  <script>
+
+    // ── 1. Algorithm data ──────────────────────────────────────
+    const algorithms = [
+      {
+        title: "BFS / DFS / UCS / IDS / A*",
+        topic: "Search",
+        category: "ai",
+        file: "algorithms/ai/search/bfs-dfs-astar.html",
+        description: "Uninformed and informed graph search algorithms, step by step.",
+        difficulty: "Beginner",
+        week: "1–2",
+        done: true,
+      },
+      {
+        title: "N-Queens",
+        topic: "Constraint Satisfaction",
+        category: "ai",
+        file: "algorithms/ai/constraint/nqueens.html",
+        description: "Backtracking with constraint propagation on the N-Queens problem.",
+        difficulty: "Intermediate",
+        week: "3",
+        done: false,
+      },
+      {
+        title: "Linear Regression",
+        topic: "Regression",
+        category: "ml",
+        file: "algorithms/ml/regression/linear-regression.html",
+        description: "Least squares fit with animated gradient descent on scatter data.",
+        difficulty: "Beginner",
+        week: "5–6",
+        done: false,
+      },
+    ];
+
+    // ── 2. Render cards ────────────────────────────────────────
+    function renderCards(filter) {
+      const grid = document.getElementById('card-grid');
+      const list = filter === 'all'
+        ? algorithms
+        : algorithms.filter(a => a.category === filter);
+
+      grid.innerHTML = list.map(a => `
+        <a class="card ${a.done ? '' : 'card--locked'}"
+           href="${a.done ? a.file : '#'}">
+
+          <div class="card-top">
+            <span class="card-topic">${a.topic}</span>
+            <span class="badge badge-${a.difficulty.toLowerCase()}">${a.difficulty}</span>
+          </div>
+
+          <h3 class="card-title">${a.title}</h3>
+          <p class="card-desc">${a.description}</p>
+
+          <div class="card-footer">
+            <span class="card-week">Week ${a.week}</span>
+            ${a.done ? '<span class="card-status done">Done</span>' : '<span class="card-status">Coming soon</span>'}
+          </div>
+
+        </a>
+      `).join('');
+    }
+
+    // ── 3. Filter buttons ──────────────────────────────────────
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderCards(btn.dataset.filter);
+      });
+    });
+
+    // ── 4. First render on page load ───────────────────────────
+    renderCards('all');
+
+  </script>
+
+</body>
+</html>

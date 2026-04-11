@@ -1,0 +1,287 @@
+/* ============================================================
+   CSS VARIABLES — one place to control the whole color system
+   ============================================================ */
+:root {
+  /* backgrounds */
+  --bg:           #F7F3EC;   /* warm cream page background */
+  --bg-card:      #FFFFFF;   /* white cards */
+  --bg-dark:      #1C1C1E;   /* dark sections / navbar */
+
+  /* text */
+  --text-primary:   #1A1A1A;
+  --text-secondary: #5C5C5C;
+  --text-on-dark:   #F7F3EC;
+
+  /* border */
+  --border:       #E0D9CF;
+
+  /* accent (active pills, links) */
+  --accent:       #D8C8F0;   /* soft lavender, like the screenshot */
+  --accent-text:  #3D1F7A;
+
+  /* algorithm visualizer colors (from project spec) */
+  --viz-frontier: #3B8BD4;   /* blue  — frontier / candidates */
+  --viz-active:   #EF9F27;   /* amber — currently expanding */
+  --viz-visited:  #63992A;   /* green — visited / settled */
+  --viz-goal:     #E24B4A;   /* red   — goal found */
+  --viz-inactive: #8F8F8F;   /* gray  — unvisited */
+  --viz-weight:   #9B59B6;   /* purple — weights / activations */
+  --viz-boundary: #1ABC9C;   /* teal  — decision boundaries */
+
+  /* spacing & shape */
+  --radius-sm:   8px;
+  --radius-md:   16px;
+  --radius-pill: 999px;
+  --max-width:   1100px;
+}
+
+/* ============================================================
+   RESET — strip browser default margin/padding/box model
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================================
+   BASE — body font, background, text color
+   ============================================================ */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* ============================================================
+   CONTAINER — centers content and limits max width
+   ============================================================ */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.5px; }
+h2 { font-size: 1.5rem; font-weight: 600; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+
+p  { color: var(--text-secondary); }
+
+/* ============================================================
+   PILL TAGS  (Beginner / Intermediate / Advanced badges)
+   ============================================================ */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.85rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  border: 1.5px solid currentColor;
+}
+
+.badge-beginner     { color: #2E7D32; background: #E8F5E9; }
+.badge-intermediate { color: #E65100; background: #FFF3E0; }
+.badge-advanced     { color: #6A1B9A; background: #F3E5F5; }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn:hover {
+  background: var(--accent);
+  border-color: var(--accent-text);
+  color: var(--accent-text);
+}
+
+.btn-primary {
+  background: var(--bg-dark);
+  color: var(--text-on-dark);
+  border-color: var(--bg-dark);
+}
+
+.btn-primary:hover {
+  background: #333;
+  border-color: #333;
+  color: var(--text-on-dark);
+}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.navbar {
+  background: var(--bg-card);          /* white */
+  border-bottom: 1.5px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.nav-logo-text {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.nav-logo-accent {
+  color: #7C3AED;   /* purple accent on "Notes" */
+}
+
+.nav-links {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.nav-link {
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-link:hover,
+.nav-link--active {
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   HOMEPAGE — hero, filter bar, card grid
+   ============================================================ */
+.hero {
+  padding: 3rem 0 1.5rem;
+}
+
+.hero h1 {
+  margin-bottom: 0.5rem;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.filter-btn.active {
+  background: var(--accent);
+  border-color: var(--accent-text);
+  color: var(--accent-text);
+}
+
+/* Grid: 3 columns on desktop, fewer on smaller screens */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.card:hover {
+  border-color: #BBAEE0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+}
+
+/* Locked (not done) cards look dimmed */
+.card--locked {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-topic {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.card-desc {
+  font-size: 0.875rem;
+  flex: 1;             /* pushes footer to the bottom */
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.card-week {
+  color: var(--text-secondary);
+}
+
+.card-status {
+  color: var(--text-secondary);
+}
+
+.card-status.done {
+  color: #2E7D32;
+  font-weight: 600;
+}

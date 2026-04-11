@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search Algorithms — AI/ML Notes</title>
+  <!-- Shared styles from project root -->
+  <link rel="stylesheet" href="../../../style.css" />
+  <!-- Page-specific styles -->
+  <style>
+
+    /* ── Accent color variable (JS overrides this per algorithm) ── */
+    :root { --accent-algo: #4A9EF8; }
+
+    /* ── Two-column layout ── */
+    .page-layout {
+      display: flex;
+      min-height: calc(100vh - 56px); /* full height minus navbar */
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 130px;
+      flex-shrink: 0;              /* never squish the sidebar */
+      background: #fff;
+      border-right: 1.5px solid var(--border);
+      padding: 1.5rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      position: sticky;
+      top: 56px;                   /* stick just below the navbar */
+      height: calc(100vh - 56px);
+      overflow-y: auto;
+    }
+
+    .sidebar-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      padding-left: 0.5rem;
+    }
+
+    /* Each algorithm pill in the sidebar */
+    .algo-pill {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .algo-pill:hover {
+      background: var(--bg);
+      color: var(--text-primary);
+    }
+
+    /* Active pill uses the algorithm's accent color */
+    .algo-pill.active {
+      background: color-mix(in srgb, var(--accent-algo) 15%, white);
+      border-color: var(--accent-algo);
+      color: var(--accent-algo);
+    }
+
+    /* ── Main content area ── */
+    .content {
+      flex: 1;
+      padding: 2rem;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ── Section card ── */
+    .section {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* Section tag: "THEORY", "ALGORITHM", "SIMULATION" */
+    .section-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent-algo);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* The horizontal rule stretching to the right */
+    .section-tag::after {
+      content: '';
+      flex: 1;
+      height: 1.5px;
+      background: color-mix(in srgb, var(--accent-algo) 25%, transparent);
+    }
+
+    /* ── Key insight callout box ── */
+    .insight-box {
+      border-left: 3px solid var(--accent-algo);
+      background: color-mix(in srgb, var(--accent-algo) 8%, white);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 0.85rem 1rem;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+    }
+
+    /* ── Properties table ── */
+    .props-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .props-table th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .props-table td {
+      padding: 0.6rem 0.75rem;
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .props-table td:first-child {
+      font-weight: 600;
+      width: 130px;
+    }
+
+    /* ── Pseudocode block ── */
+    .pseudocode {
+      background: #1C1C1E;
+      color: #E8E8E8;
+      border-radius: var(--radius-sm);
+      padding: 1.25rem 1.5rem;
+      font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* Syntax highlight spans inside pseudocode */
+    .kw   { color: #CF9DFF; }   /* keywords: if, while, for, return */
+    .fn   { color: #79C0FF; }   /* function names */
+    .cm   { color: #6A737D; font-style: italic; }  /* comments */
+
+    /* ── Simulation controls ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .speed-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: auto;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* ── Color legend ── */
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+
+    /* ── SVG graph ── */
+    #graph-svg {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+    }
+
+    /* ── Step log bar ── */
+    .step-log {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      min-height: 38px;
+    }
+
+    /* ── Edit/Run toggle button ── */
+    .btn-edit-toggle {
+      border-color: var(--accent-algo);
+      color: var(--accent-algo);
+      font-weight: 600;
+    }
+
+    /* Active edit mode — button looks "pressed" */
+    .btn-edit-toggle.active {
+      background: var(--accent-algo);
+      color: #fff;
+    }
+
+    /* Hint bar shown during edit mode */
+    .edit-hint {
+      background: #FFFBEB;
+      border: 1.5px solid #FDE68A;
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 1rem;
+      font-size: 0.82rem;
+      color: #92400E;
+    }
+
+    /* ── Mobile: stack sidebar on top ── */
+    @media (max-width: 600px) {
+      .page-layout  { flex-direction: column; }
+      .sidebar      { width: 100%; height: auto; flex-direction: row;
+                      flex-wrap: wrap; position: static; border-right: none;
+                      border-bottom: 1.5px solid var(--border); }
+      .sidebar-label { display: none; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR (injected by nav.js) -->
+  <script src="../../../components/nav.js"></script>
+
+  <!-- PAGE LAYOUT: sidebar + content -->
+  <div class="page-layout">
+
+    <!-- ── LEFT SIDEBAR ── -->
+    <aside class="sidebar">
+      <p class="sidebar-label">Algorithm</p>
+
+      <!-- One button per algorithm — JS will highlight the active one -->
+      <button class="algo-pill active" data-algo="bfs">BFS</button>
+      <button class="algo-pill" data-algo="dfs">DFS</button>
+      <button class="algo-pill" data-algo="ucs">UCS</button>
+      <button class="algo-pill" data-algo="ids">IDS</button>
+      <button class="algo-pill" data-algo="astar">A*</button>
+    </aside>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="content">
+
+      <!-- ─── SECTION 1: THEORY ─────────────────────────────── -->
+      <section class="section">
+        <div class="section-tag">Theory</div>
+
+        <!-- JS will fill everything inside these divs -->
+        <div id="theory-title">
+          <h2></h2>
+          <p class="subtitle"></p>
+        </div>
+
+        <div id="theory-insight" class="insight-box">
+          <!-- key insight callout -->
+        </div>
+
+        <table id="theory-table" class="props-table">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- rows: Complete, Optimal, Time, Space -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ─── SECTION 2: ALGORITHM ──────────────────────────── -->
+      <section class="section">
+        <div class="section-tag">Algorithm</div>
+
+        <!-- Monospace pseudocode block — JS fills it -->
+        <pre id="pseudocode" class="pseudocode"></pre>
+      </section>
+
+      <!-- ─── SECTION 3: SIMULATION ─────────────────────────── -->
+      <section class="section">
+        <div class="section-tag">Simulation</div>
+
+        <!-- Controls row -->
+        <div class="controls">
+          <!-- Toggle sits first, always visible -->
+          <button class="btn btn-edit-toggle" id="btn-toggle-mode">✏️ Edit Graph</button>
+
+          <!-- These hide in edit mode -->
+          <span id="run-controls">
+            <button class="btn btn-primary" id="btn-run">▶ Run</button>
+            <button class="btn" id="btn-step">Step</button>
+            <button class="btn" id="btn-reset">Reset</button>
+          </span>
+
+          <div class="speed-wrap">
+            <label for="speed-slider">Speed</label>
+            <input type="range" id="speed-slider" min="1" max="5" value="3" />
+          </div>
+        </div>
+
+        <!-- Edit mode hint bar (hidden in run mode) -->
+        <div id="edit-hint" class="edit-hint" style="display:none">
+          <strong>Edit mode:</strong>
+          Click empty space to add a node &nbsp;·&nbsp;
+          Drag a node to move it &nbsp;·&nbsp;
+          Click two nodes to connect them &nbsp;·&nbsp;
+          Right-click a node to delete it
+        </div>
+
+        <!-- Color legend -->
+        <div class="legend">
+          <span class="legend-dot" style="background:var(--viz-inactive)"></span> Unvisited
+          <span class="legend-dot" style="background:var(--viz-frontier)"></span> Frontier
+          <span class="legend-dot" style="background:var(--viz-active)"></span> Expanding
+          <span class="legend-dot" style="background:var(--viz-visited)"></span> Visited
+          <span class="legend-dot" style="background:var(--viz-goal)"></span> Goal
+        </div>
+
+        <!-- SVG canvas — JS draws the graph here -->
+        <svg id="graph-svg"
+             viewBox="0 0 680 400"
+             width="100%"
+             xmlns="http://www.w3.org/2000/svg">
+        </svg>
+
+        <!-- Step log — narrates what just happened -->
+        <div id="step-log" class="step-log">
+          Press Step or Run to start.
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Shared graph editor component -->
+  <script src="../../../components/graph-editor.js"></script>
+
+  <!-- PAGE SCRIPT -->
+  <script>
+
+    /* ============================================================
+       DATA LAYER — theory, pseudocode, and graph per algorithm
+       ============================================================ */
+
+    // ── Graph definition (shared by all 5 algorithms) ──────────
+    // Nodes: id, label, x/y position on the 680×400 SVG canvas
+    // Edges: from → to, with an optional cost (used by UCS and A*)
+    const GRAPH = {
+      nodes: [
+        { id: 'S',  label: 'S',  x: 80,  y: 200 },   // Start
+        { id: 'A',  label: 'A',  x: 220, y: 100 },
+        { id: 'B',  label: 'B',  x: 220, y: 300 },
+        { id: 'C',  label: 'C',  x: 370, y: 100 },
+        { id: 'D',  label: 'D',  x: 370, y: 300 },
+        { id: 'E',  label: 'E',  x: 510, y: 100 },
+        { id: 'G',  label: 'G',  x: 600, y: 200 },   // Goal
+      ],
+      edges: [
+        { from: 'S', to: 'A', cost: 1 },
+        { from: 'S', to: 'B', cost: 4 },
+        { from: 'A', to: 'C', cost: 2 },
+        { from: 'A', to: 'D', cost: 5 },
+        { from: 'B', to: 'D', cost: 2 },
+        { from: 'C', to: 'E', cost: 1 },
+        { from: 'D', to: 'G', cost: 3 },
+        { from: 'E', to: 'G', cost: 2 },
+      ],
+      start: 'S',
+      goal:  'G',
+      // Heuristic h(n): estimated cost from n to Goal (used by A*)
+      heuristic: { S: 6, A: 5, B: 4, C: 3, D: 2, E: 1, G: 0 },
+    };
+
+    // Build adjacency list from edges for easy lookup
+    // Result: { S: [{id:'A',cost:1},{id:'B',cost:4}], A: [...], ... }
+    const ADJ = {};
+    GRAPH.nodes.forEach(n => ADJ[n.id] = []);
+    GRAPH.edges.forEach(e => {
+      ADJ[e.from].push({ id: e.to,   cost: e.cost });
+      ADJ[e.to  ].push({ id: e.from, cost: e.cost }); // undirected
+    });
+
+
+    // ── Algorithm definitions ───────────────────────────────────
+    const ALGOS = {
+
+      bfs: {
+        name:     'Breadth-First Search',
+        subtitle: 'Explores all neighbours level by level.',
+        accent:   '#4A9EF8',
+        insight:  'BFS always finds the <strong>shortest path by number of edges</strong> because it explores every node at distance k before any node at distance k+1.',
+        props: [
+          { name: 'Complete',  value: '✅ Yes — finds a solution if one exists' },
+          { name: 'Optimal',   value: '✅ Yes — optimal for uniform edge costs' },
+          { name: 'Time',      value: '<code>O(b<sup>d</sup>)</code> — b = branching factor, d = depth' },
+          { name: 'Space',     value: '<code>O(b<sup>d</sup>)</code> — stores entire frontier' },
+        ],
+        pseudocode:
+`<span class="fn">BFS</span>(start, goal):
+  frontier ← Queue([start])
+  visited  ← {start}
+  parent   ← {start: null}
+
+  <span class="kw">while</span> frontier is not empty:
+    node ← frontier.<span class="fn">dequeue</span>()          <span class="cm">// FIFO — oldest first</span>
+
+    <span class="kw">if</span> node == goal:
+      <span class="kw">return</span> <span class="fn">reconstruct_path</span>(parent, goal)
+
+    <span class="kw">for</span> each neighbour of node:
+      <span class="kw">if</span> neighbour not in visited:
+        visited.<span class="fn">add</span>(neighbour)
+        parent[neighbour] ← node
+        frontier.<span class="fn">enqueue</span>(neighbour)
+
+  <span class="kw">return</span> failure`,
+      },
+
+      dfs: {
+        name:     'Depth-First Search',
+        subtitle: 'Dives as deep as possible before backtracking.',
+        accent:   '#A78BFA',
+        insight:  'DFS uses a <strong>stack</strong> instead of a queue — it always expands the most recently discovered node, diving deep before exploring siblings.',
+        props: [
+          { name: 'Complete',  value: '❌ No — can get stuck in infinite loops (without visited set)' },
+          { name: 'Optimal',   value: '❌ No — may find a longer path first' },
+          { name: 'Time',      value: '<code>O(b<sup>m</sup>)</code> — m = max depth of tree' },
+          { name: 'Space',     value: '<code>O(b·m)</code> — only stores current path' },
+        ],
+        pseudocode:
+`<span class="fn">DFS</span>(start, goal):
+  frontier ← Stack([start])
+  visited  ← {}
+  parent   ← {start: null}
+
+  <span class="kw">while</span> frontier is not empty:
+    node ← frontier.<span class="fn">pop</span>()              <span class="cm">// LIFO — newest first</span>
+
+    <span class="kw">if</span> node in visited: <span class="kw">continue</span>
+    visited.<span class="fn">add</span>(node)
+
+    <span class="kw">if</span> node == goal:
+      <span class="kw">return</span> <span class="fn">reconstruct_path</span>(parent, goal)
+
+    <span class="kw">for</span> each neighbour of node:
+      <span class="kw">if</span> neighbour not in visited:
+        parent[neighbour] ← node
+        frontier.<span class="fn">push</span>(neighbour)
+
+  <span class="kw">return</span> failure`,
+      },
+
+      ucs: {
+        name:     'Uniform-Cost Search',
+        subtitle: 'Expands the lowest-cost path seen so far.',
+        accent:   '#FBBF24',
+        insight:  'UCS is BFS generalised to weighted edges. It uses a <strong>priority queue ordered by cumulative path cost</strong> g(n), guaranteeing the cheapest path.',
+        props: [
+          { name: 'Complete',  value: '✅ Yes — if costs are positive' },
+          { name: 'Optimal',   value: '✅ Yes — always finds cheapest path' },
+          { name: 'Time',      value: '<code>O(b<sup>1+⌊C*/ε⌋</sup>)</code> — C* = optimal cost' },
+          { name: 'Space',     value: '<code>O(b<sup>1+⌊C*/ε⌋</sup>)</code>' },
+        ],
+        pseudocode:
+`<span class="fn">UCS</span>(start, goal):
+  frontier ← PriorityQueue([(0, start)])
+  visited  ← {}
+  cost     ← {start: 0}
+
+  <span class="kw">while</span> frontier is not empty:
+    g, node ← frontier.<span class="fn">pop_min</span>()       <span class="cm">// lowest g(n) first</span>
+
+    <span class="kw">if</span> node in visited: <span class="kw">continue</span>
+    visited.<span class="fn">add</span>(node)
+
+    <span class="kw">if</span> node == goal: <span class="kw">return</span> g
+
+    <span class="kw">for</span> each (neighbour, edge_cost) of node:
+      new_cost ← g + edge_cost
+      <span class="kw">if</span> new_cost < cost.get(neighbour, ∞):
+        cost[neighbour] ← new_cost
+        frontier.<span class="fn">push</span>((new_cost, neighbour))
+
+  <span class="kw">return</span> failure`,
+      },
+
+      ids: {
+        name:     'Iterative Deepening Search',
+        subtitle: 'Repeated DFS with increasing depth limits.',
+        accent:   '#34D399',
+        insight:  'IDS combines DFS\'s <strong>low memory</strong> with BFS\'s <strong>completeness</strong>. It restarts DFS from scratch each iteration but raises the depth limit by 1, so it never misses shallow solutions.',
+        props: [
+          { name: 'Complete',  value: '✅ Yes' },
+          { name: 'Optimal',   value: '✅ Yes — for uniform edge costs' },
+          { name: 'Time',      value: '<code>O(b<sup>d</sup>)</code>' },
+          { name: 'Space',     value: '<code>O(b·d)</code> — best of all uninformed searches' },
+        ],
+        pseudocode:
+`<span class="fn">IDS</span>(start, goal):
+  <span class="kw">for</span> limit = 0, 1, 2, …:           <span class="cm">// raise depth limit each round</span>
+    result ← <span class="fn">DLS</span>(start, goal, limit)
+    <span class="kw">if</span> result ≠ cutoff:
+      <span class="kw">return</span> result
+
+<span class="fn">DLS</span>(node, goal, limit):           <span class="cm">// Depth-Limited Search</span>
+  <span class="kw">if</span> node == goal: <span class="kw">return</span> node
+  <span class="kw">if</span> limit == 0:  <span class="kw">return</span> cutoff
+
+  <span class="kw">for</span> each neighbour of node:
+    result ← <span class="fn">DLS</span>(neighbour, goal, limit - 1)
+    <span class="kw">if</span> result ≠ cutoff:
+      <span class="kw">return</span> result
+
+  <span class="kw">return</span> cutoff`,
+      },
+
+      astar: {
+        name:     'A* Search',
+        subtitle: 'Combines path cost g(n) with heuristic estimate h(n).',
+        accent:   '#F87171',
+        insight:  'A* expands nodes ordered by <strong>f(n) = g(n) + h(n)</strong>. With an admissible heuristic (never over-estimates), it is both complete and optimal — and far faster than UCS in practice.',
+        props: [
+          { name: 'Complete',  value: '✅ Yes — with admissible heuristic' },
+          { name: 'Optimal',   value: '✅ Yes — with admissible heuristic' },
+          { name: 'Time',      value: '<code>O(b<sup>d</sup>)</code> — depends heavily on heuristic quality' },
+          { name: 'Space',     value: '<code>O(b<sup>d</sup>)</code> — keeps all nodes in memory' },
+        ],
+        pseudocode:
+`<span class="fn">A_STAR</span>(start, goal):
+  frontier ← PriorityQueue([(h(start), start)])
+  g_cost   ← {start: 0}
+  parent   ← {start: null}
+
+  <span class="kw">while</span> frontier is not empty:
+    f, node ← frontier.<span class="fn">pop_min</span>()
+
+    <span class="kw">if</span> node == goal:
+      <span class="kw">return</span> <span class="fn">reconstruct_path</span>(parent, goal)
+
+    <span class="kw">for</span> each (neighbour, edge_cost) of node:
+      new_g ← g_cost[node] + edge_cost
+      <span class="kw">if</span> new_g < g_cost.get(neighbour, ∞):
+        g_cost[neighbour]  ← new_g
+        parent[neighbour]  ← node
+        f_score            ← new_g + <span class="fn">h</span>(neighbour)  <span class="cm">// f = g + h</span>
+        frontier.<span class="fn">push</span>((f_score, neighbour))
+
+  <span class="kw">return</span> failure`,
+      },
+
+    }; // end ALGOS
+
+
+    /* ============================================================
+       UI LAYER — fills Theory + Algorithm sections from ALGOS data
+       ============================================================ */
+
+    function loadAlgo(key) {
+      const a = ALGOS[key];
+
+      // 1. Update CSS accent color
+      document.documentElement.style.setProperty('--accent-algo', a.accent);
+
+      // 2. Theory — title + subtitle
+      document.querySelector('#theory-title h2').textContent = a.name;
+      document.querySelector('#theory-title .subtitle').textContent = a.subtitle;
+
+      // 3. Theory — insight box
+      document.getElementById('theory-insight').innerHTML = a.insight;
+
+      // 4. Theory — properties table rows
+      const tbody = document.querySelector('#theory-table tbody');
+      tbody.innerHTML = a.props.map(p => `
+        <tr>
+          <td>${p.name}</td>
+          <td>${p.value}</td>
+        </tr>
+      `).join('');
+
+      // 5. Algorithm — pseudocode
+      document.getElementById('pseudocode').innerHTML = a.pseudocode;
+
+      // 6. Reset simulation
+      resetSim();
+    }
+
+    // ── Sidebar pill clicks ─────────────────────────────────────
+    document.querySelectorAll('.algo-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.algo-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        loadAlgo(pill.dataset.algo);
+      });
+    });
+
+    /* ============================================================
+       SIMULATION ENGINE
+       ============================================================ */
+
+    let steps       = [];   // array of pre-computed step snapshots
+    let stepIndex   = -1;   // which step we're on (-1 = not started)
+    let runTimer    = null; // setInterval handle for Run mode
+    let currentAlgo = 'bfs';
+
+    // Speed slider → milliseconds between steps
+    function stepDelay() {
+      const v = document.getElementById('speed-slider').value; // 1–5
+      return [800, 500, 300, 175, 80][v - 1];
+    }
+
+
+    /* ------------------------------------------------------------
+       1. DRAW GRAPH
+       Renders the SVG from a step snapshot.
+       snapshot = { nodeStates, pathEdges, log }
+         nodeStates : { 'A': 'frontier' | 'active' | 'visited' | 'goal' | 'inactive' }
+         pathEdges  : Set of 'X-Y' strings marking the current best path
+    ------------------------------------------------------------ */
+    const STATE_COLOR = {
+      inactive: 'var(--viz-inactive)',
+      frontier: 'var(--viz-frontier)',
+      active:   'var(--viz-active)',
+      visited:  'var(--viz-visited)',
+      goal:     'var(--viz-goal)',
+    };
+
+    function drawGraph(snapshot) {
+      const svg    = document.getElementById('graph-svg');
+      const ns     = 'http://www.w3.org/2000/svg';
+      const states = snapshot ? snapshot.nodeStates : {};
+      const edges  = snapshot ? snapshot.pathEdges  : new Set();
+
+      svg.innerHTML = ''; // clear previous frame
+
+      // ── Draw edges ──────────────────────────────────────────
+      GRAPH.edges.forEach(e => {
+        const a = GRAPH.nodes.find(n => n.id === e.from);
+        const b = GRAPH.nodes.find(n => n.id === e.to);
+        const key1 = `${e.from}-${e.to}`;
+        const key2 = `${e.to}-${e.from}`;
+        const onPath = edges.has(key1) || edges.has(key2);
+
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+        line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+        line.setAttribute('stroke',       onPath ? '#333' : '#CCC');
+        line.setAttribute('stroke-width', onPath ? 2.5   : 1.5);
+        svg.appendChild(line);
+
+        // Edge cost label (midpoint)
+        const tx = document.createElementNS(ns, 'text');
+        tx.setAttribute('x', (a.x + b.x) / 2);
+        tx.setAttribute('y', (a.y + b.y) / 2 - 6);
+        tx.setAttribute('text-anchor', 'middle');
+        tx.setAttribute('font-size', '11');
+        tx.setAttribute('fill', '#999');
+        tx.textContent = e.cost;
+        svg.appendChild(tx);
+      });
+
+      // ── Draw nodes ──────────────────────────────────────────
+      GRAPH.nodes.forEach(n => {
+        const state = states[n.id] || 'inactive';
+        const color = STATE_COLOR[state];
+
+        // circle
+        const circle = document.createElementNS(ns, 'circle');
+        circle.setAttribute('cx', n.x);
+        circle.setAttribute('cy', n.y);
+        circle.setAttribute('r',  22);
+        circle.setAttribute('fill',         color);
+        circle.setAttribute('stroke',       state === 'active' ? '#333' : 'transparent');
+        circle.setAttribute('stroke-width', 2.5);
+        svg.appendChild(circle);
+
+        // node label
+        const label = document.createElementNS(ns, 'text');
+        label.setAttribute('x', n.x);
+        label.setAttribute('y', n.y + 5);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('font-size',   '14');
+        label.setAttribute('font-weight', '700');
+        label.setAttribute('fill',        state === 'inactive' ? '#fff' : '#fff');
+        label.textContent = n.label;
+        svg.appendChild(label);
+      });
+
+      // ── Update step log ──────────────────────────────────────
+      if (snapshot) {
+        document.getElementById('step-log').textContent = snapshot.log;
+      }
+    }
+
+
+    /* ------------------------------------------------------------
+       2. BUILD STEPS
+       Pre-runs the algorithm and records every meaningful state
+       change as a snapshot array. Step/Run just replay these.
+    ------------------------------------------------------------ */
+    function buildSteps(algoKey) {
+      const snaps  = [];
+      const start  = GRAPH.start;
+      const goal   = GRAPH.goal;
+
+      // helper: build a Set of path edges from a parent map + end node
+      function pathEdges(parent, node) {
+        const edges = new Set();
+        let cur = node;
+        while (parent[cur] !== null && parent[cur] !== undefined) {
+          edges.add(`${parent[cur]}-${cur}`);
+          cur = parent[cur];
+        }
+        return edges;
+      }
+
+      // helper: push a snapshot
+      function snap(nodeStates, log, parent, current) {
+        snaps.push({
+          nodeStates: { ...nodeStates },
+          pathEdges:  parent ? pathEdges(parent, current) : new Set(),
+          log,
+        });
+      }
+
+      // initial state — all nodes inactive
+      const initStates = {};
+      GRAPH.nodes.forEach(n => initStates[n.id] = 'inactive');
+
+      // ── BFS ─────────────────────────────────────────────────
+      if (algoKey === 'bfs') {
+        const ns      = { ...initStates, [start]: 'frontier' };
+        const visited = new Set([start]);
+        const parent  = { [start]: null };
+        const queue   = [start];
+
+        snap(ns, `Start: add ${start} to frontier queue.`, parent, start);
+
+        while (queue.length) {
+          const node = queue.shift(); // dequeue — FIFO
+          ns[node] = 'active';
+          snap(ns, `Dequeue ${node} — expanding.`, parent, node);
+
+          if (node === goal) {
+            ns[node] = 'goal';
+            snap(ns, `🎉 Goal ${goal} found! Path: ${reconstructPath(parent, goal).join(' → ')}`, parent, node);
+            break;
+          }
+
+          ns[node] = 'visited';
+          ADJ[node].forEach(({ id: nb }) => {
+            if (!visited.has(nb)) {
+              visited.add(nb);
+              parent[nb] = node;
+              ns[nb] = 'frontier';
+              queue.push(nb);
+              snap(ns, `Add ${nb} to frontier (discovered from ${node}).`, parent, nb);
+            }
+          });
+        }
+      }
+
+      // ── DFS ─────────────────────────────────────────────────
+      else if (algoKey === 'dfs') {
+        const ns      = { ...initStates, [start]: 'frontier' };
+        const visited = new Set();
+        const parent  = { [start]: null };
+        const stack   = [start];
+
+        snap(ns, `Start: push ${start} onto stack.`, parent, start);
+
+        while (stack.length) {
+          const node = stack.pop(); // LIFO
+          if (visited.has(node)) continue;
+
+          visited.add(node);
+          ns[node] = 'active';
+          snap(ns, `Pop ${node} — expanding.`, parent, node);
+
+          if (node === goal) {
+            ns[node] = 'goal';
+            snap(ns, `🎉 Goal ${goal} found! Path: ${reconstructPath(parent, goal).join(' → ')}`, parent, node);
+            break;
+          }
+
+          ns[node] = 'visited';
+          ADJ[node].forEach(({ id: nb }) => {
+            if (!visited.has(nb)) {
+              parent[nb] = node;
+              ns[nb] = 'frontier';
+              stack.push(nb);
+            }
+          });
+          snap(ns, `${node} visited — pushed neighbours onto stack.`, parent, node);
+        }
+      }
+
+      // ── UCS ─────────────────────────────────────────────────
+      else if (algoKey === 'ucs') {
+        const ns     = { ...initStates, [start]: 'frontier' };
+        const visited = new Set();
+        const parent  = { [start]: null };
+        const gCost   = { [start]: 0 };
+        // priority queue as sorted array [cost, id]
+        const pq = [[0, start]];
+
+        snap(ns, `Start: add ${start} with cost 0 to priority queue.`, parent, start);
+
+        while (pq.length) {
+          pq.sort((a, b) => a[0] - b[0]);
+          const [g, node] = pq.shift();
+
+          if (visited.has(node)) continue;
+          visited.add(node);
+          ns[node] = 'active';
+          snap(ns, `Expand ${node} — cheapest path cost so far: g=${g}.`, parent, node);
+
+          if (node === goal) {
+            ns[node] = 'goal';
+            snap(ns, `🎉 Goal ${goal} found! Total cost: ${g}. Path: ${reconstructPath(parent, goal).join(' → ')}`, parent, node);
+            break;
+          }
+
+          ns[node] = 'visited';
+          ADJ[node].forEach(({ id: nb, cost }) => {
+            const newG = g + cost;
+            if (!visited.has(nb) && (gCost[nb] === undefined || newG < gCost[nb])) {
+              gCost[nb]  = newG;
+              parent[nb] = node;
+              ns[nb]     = 'frontier';
+              pq.push([newG, nb]);
+              snap(ns, `Update ${nb}: g=${newG} (via ${node}, edge cost ${cost}).`, parent, nb);
+            }
+          });
+        }
+      }
+
+      // ── IDS ─────────────────────────────────────────────────
+      else if (algoKey === 'ids') {
+        let found = false;
+        for (let limit = 0; limit <= 6 && !found; limit++) {
+          const ns     = { ...initStates };
+          const parent = { [start]: null };
+
+          snap(ns, `IDS iteration: depth limit = ${limit}. Restarting from ${start}.`, parent, start);
+
+          // DLS implemented iteratively with a stack of {node, depth, parent}
+          const stack = [{ node: start, depth: 0 }];
+          const visited = new Set();
+
+          while (stack.length) {
+            const { node, depth } = stack.pop();
+            if (visited.has(node)) continue;
+            visited.add(node);
+
+            ns[node] = 'active';
+            snap(ns, `Visit ${node} at depth ${depth} (limit ${limit}).`, parent, node);
+
+            if (node === goal) {
+              ns[node] = 'goal';
+              snap(ns, `🎉 Goal ${goal} found at depth ${depth}! Path: ${reconstructPath(parent, goal).join(' → ')}`, parent, node);
+              found = true;
+              break;
+            }
+
+            ns[node] = 'visited';
+            if (depth < limit) {
+              ADJ[node].forEach(({ id: nb }) => {
+                if (!visited.has(nb)) {
+                  parent[nb] = node;
+                  ns[nb] = 'frontier';
+                  stack.push({ node: nb, depth: depth + 1 });
+                }
+              });
+              snap(ns, `${node} expanded at depth ${depth}.`, parent, node);
+            } else {
+              snap(ns, `${node} at depth limit — not expanding further.`, parent, node);
+            }
+          }
+        }
+      }
+
+      // ── A* ──────────────────────────────────────────────────
+      else if (algoKey === 'astar') {
+        const h      = GRAPH.heuristic;
+        const ns     = { ...initStates, [start]: 'frontier' };
+        const visited = new Set();
+        const parent  = { [start]: null };
+        const gCost   = { [start]: 0 };
+        const pq      = [[h[start], start]]; // [f, id]
+
+        snap(ns, `Start: ${start} — g=0, h=${h[start]}, f=${h[start]}.`, parent, start);
+
+        while (pq.length) {
+          pq.sort((a, b) => a[0] - b[0]);
+          const [f, node] = pq.shift();
+
+          if (visited.has(node)) continue;
+          visited.add(node);
+          ns[node] = 'active';
+          snap(ns, `Expand ${node} — f=${f}, g=${gCost[node]}, h=${h[node]}.`, parent, node);
+
+          if (node === goal) {
+            ns[node] = 'goal';
+            snap(ns, `🎉 Goal ${goal} found! Cost: ${gCost[node]}. Path: ${reconstructPath(parent, goal).join(' → ')}`, parent, node);
+            break;
+          }
+
+          ns[node] = 'visited';
+          ADJ[node].forEach(({ id: nb, cost }) => {
+            const newG = gCost[node] + cost;
+            if (!visited.has(nb) && (gCost[nb] === undefined || newG < gCost[nb])) {
+              gCost[nb]  = newG;
+              parent[nb] = node;
+              ns[nb]     = 'frontier';
+              const fScore = newG + h[nb];
+              pq.push([fScore, nb]);
+              snap(ns, `Update ${nb}: g=${newG}, h=${h[nb]}, f=${fScore} (via ${node}).`, parent, nb);
+            }
+          });
+        }
+      }
+
+      return snaps;
+    }
+
+    // Reconstruct path array from parent map
+    function reconstructPath(parent, goal) {
+      const path = [];
+      let cur = goal;
+      while (cur !== null && cur !== undefined) {
+        path.unshift(cur);
+        cur = parent[cur];
+      }
+      return path;
+    }
+
+
+    /* ------------------------------------------------------------
+       3. CONTROLS — Step / Run / Reset
+    ------------------------------------------------------------ */
+    function stopRun() {
+      if (runTimer) { clearInterval(runTimer); runTimer = null; }
+      document.getElementById('btn-run').textContent = '▶ Run';
+    }
+
+    function resetSim() {
+      stopRun();
+      stepIndex = -1;
+      steps = buildSteps(currentAlgo);
+      // draw initial graph (all inactive)
+      drawGraph({
+        nodeStates: Object.fromEntries(GRAPH.nodes.map(n => [n.id, 'inactive'])),
+        pathEdges:  new Set(),
+        log:        'Press Step or Run to start.',
+      });
+    }
+
+    document.getElementById('btn-step').addEventListener('click', () => {
+      stopRun();
+      if (stepIndex < steps.length - 1) {
+        stepIndex++;
+        drawGraph(steps[stepIndex]);
+      }
+    });
+
+    document.getElementById('btn-run').addEventListener('click', () => {
+      if (runTimer) { stopRun(); return; } // toggle off
+
+      document.getElementById('btn-run').textContent = '⏸ Pause';
+
+      if (stepIndex >= steps.length - 1) resetSim(); // replay from start
+
+      runTimer = setInterval(() => {
+        stepIndex++;
+        drawGraph(steps[stepIndex]);
+        if (stepIndex >= steps.length - 1) stopRun();
+      }, stepDelay());
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', resetSim);
+
+    // Rebuild steps when algo changes (loadAlgo calls resetSim which calls buildSteps)
+    // We just need to keep currentAlgo in sync
+    document.querySelectorAll('.algo-pill').forEach(pill => {
+      pill.addEventListener('click', () => { currentAlgo = pill.dataset.algo; });
+    });
+
+
+    /* ============================================================
+       GRAPH EDITOR — modular component
+    ============================================================ */
+
+    function rebuildADJ() {
+      GRAPH.nodes.forEach(n => { ADJ[n.id] = []; });
+      GRAPH.edges.forEach(e => {
+        ADJ[e.from].push({ id: e.to,   cost: e.cost });
+        ADJ[e.to  ].push({ id: e.from, cost: e.cost });
+      });
+    }
+
+    const editor = new GraphEditor({
+      svgId:         'graph-svg',
+      graph:         GRAPH,
+      logId:         'step-log',
+      onGraphChange: rebuildADJ,
+    });
+
+    /* ============================================================
+       MODE TOGGLE — Edit ↔ Run
+    ============================================================ */
+    let editMode = false;
+
+    const btnToggle   = document.getElementById('btn-toggle-mode');
+    const runControls = document.getElementById('run-controls');
+    const editHint    = document.getElementById('edit-hint');
+
+    btnToggle.addEventListener('click', () => {
+      editMode = !editMode;
+
+      if (editMode) {
+        stopRun();
+        btnToggle.textContent = '▶ Run Mode';
+        btnToggle.classList.add('active');
+        runControls.style.display = 'none';
+        editHint.style.display    = 'block';
+        editor.enable();
+      } else {
+        btnToggle.textContent = '✏️ Edit Graph';
+        btnToggle.classList.remove('active');
+        runControls.style.display = 'inline-flex';
+        editHint.style.display    = 'none';
+        editor.disable();
+        resetSim();   // rebuild steps on the edited graph
+      }
+    });
+
+    // ── Load BFS on first open ──────────────────────────────────
+    loadAlgo('bfs');
+
+  </script>
+
+</body>
+</html>
