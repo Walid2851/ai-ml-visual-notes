@@ -713,6 +713,7 @@
        ============================================================ */
 
     function loadAlgo(key) {
+      currentAlgo = key;
       const a = ALGOS[key];
 
       // 1. Update CSS accent color
@@ -1136,11 +1137,7 @@
 
     document.getElementById('btn-reset').addEventListener('click', resetSim);
 
-    // Rebuild steps when algo changes (loadAlgo calls resetSim which calls buildSteps)
-    // We just need to keep currentAlgo in sync
-    document.querySelectorAll('.algo-pill').forEach(pill => {
-      pill.addEventListener('click', () => { currentAlgo = pill.dataset.algo; });
-    });
+    // currentAlgo is kept in sync inside loadAlgo(key)
 
 
     /* ============================================================
