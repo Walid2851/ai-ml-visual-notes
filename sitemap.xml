@@ -3,30 +3,42 @@
 
   <url>
     <loc>https://walid2851.github.io/ai-ml-visual-notes/</loc>
+    <lastmod>2026-05-12</lastmod>
     <priority>1.0</priority>
     <changefreq>weekly</changefreq>
   </url>
 
   <url>
     <loc>https://walid2851.github.io/ai-ml-visual-notes/algorithms/ai/search/bfs-dfs-astar.html</loc>
+    <lastmod>2026-05-12</lastmod>
     <priority>0.9</priority>
     <changefreq>monthly</changefreq>
   </url>
 
   <url>
     <loc>https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/regression/gradient-descent.html</loc>
+    <lastmod>2026-05-12</lastmod>
     <priority>0.9</priority>
     <changefreq>monthly</changefreq>
   </url>
 
   <url>
     <loc>https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/regression/linear-regression.html</loc>
+    <lastmod>2026-05-12</lastmod>
     <priority>0.9</priority>
     <changefreq>monthly</changefreq>
   </url>
 
   <url>
     <loc>https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/regression/logistic-regression.html</loc>
+    <lastmod>2026-05-12</lastmod>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/neural-network/ann.html</loc>
+    <lastmod>2026-05-12</lastmod>
     <priority>0.9</priority>
     <changefreq>monthly</changefreq>
   </url>

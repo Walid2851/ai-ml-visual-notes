@@ -6,9 +6,12 @@
 
   <!-- ── Primary SEO ── -->
   <title>AI / ML Algorithm Visualizer &amp; Simulation — Interactive Visual Notes</title>
-  <meta name="description" content="Free interactive simulations and visualizations of AI and ML algorithms — BFS, DFS, A*, Linear Regression, Logistic Regression, Gradient Descent and more. Step-by-step animations for students and developers." />
-  <meta name="keywords" content="AI algorithm visualizer, ML algorithm visualizer, AI algorithm simulation, ML algorithm simulation, machine learning simulation, artificial intelligence simulation, BFS visualization, DFS visualization, A star search, gradient descent animation, linear regression interactive, logistic regression visualization, machine learning tutorial, algorithm step by step, computer science education" />
+  <meta name="description" content="Free interactive simulations and visualizations of AI and ML algorithms — BFS, DFS, A*, Linear Regression, Logistic Regression, Gradient Descent, and Neural Networks. Step-by-step animations for students and developers." />
+  <meta name="keywords" content="AI algorithm visualizer, ML algorithm visualizer, BFS visualization, DFS visualization, A star search, gradient descent animation, linear regression interactive, logistic regression visualization, neural network backpropagation, machine learning tutorial, algorithm step by step, computer science education" />
   <meta name="author" content="Mahamud Hasan Walid" />
+  <meta name="robots" content="index, follow" />
+  <meta name="language" content="en-US" />
+  <meta name="theme-color" content="#1a1a1a" />
   <meta name="google-site-verification" content="CJcimWYtCujbVSJC2NdV4FoY76W0c0XAn8qpN3IFhuQ" />
   <link rel="canonical" href="https://walid2851.github.io/ai-ml-visual-notes/" />
 
@@ -27,14 +30,139 @@
 
   <!-- ── Structured Data (JSON-LD) ── -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "AI / ML Visual Notes",
-    "url": "https://walid2851.github.io/ai-ml-visual-notes/",
-    "description": "Free interactive visualizations of AI and ML algorithms for students and developers.",
-    "author": { "@type": "Person", "name": "Mahamud Hasan Walid" }
-  }
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "AI / ML Visual Notes",
+      "url": "https://walid2851.github.io/ai-ml-visual-notes/",
+      "description": "Free interactive step-by-step simulations of AI and ML algorithms — BFS, DFS, A*, Gradient Descent, Linear Regression, Logistic Regression, and Artificial Neural Networks.",
+      "inLanguage": "en-US",
+      "author": {
+        "@type": "Person",
+        "name": "Mahamud Hasan Walid",
+        "url": "https://walid2851.github.io/",
+        "sameAs": ["https://walid2851.github.io/"]
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "AI / ML Algorithm Visualizations",
+      "description": "Interactive step-by-step visualizations of AI and ML algorithms.",
+      "itemListElement": [
+        {
+          "@type": "ListItem", "position": 1,
+          "item": {
+            "@type": "LearningResource",
+            "name": "BFS, DFS, UCS, IDS & A* Search Visualizer",
+            "url": "https://walid2851.github.io/ai-ml-visual-notes/algorithms/ai/search/bfs-dfs-astar.html",
+            "description": "Interactive step-by-step visualizer for Breadth-First Search, Depth-First Search, Uniform-Cost Search, Iterative Deepening Search, and A* pathfinding.",
+            "educationalLevel": "Beginner",
+            "learningResourceType": "Simulation"
+          }
+        },
+        {
+          "@type": "ListItem", "position": 2,
+          "item": {
+            "@type": "LearningResource",
+            "name": "Gradient Descent Visualizer",
+            "url": "https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/regression/gradient-descent.html",
+            "description": "Watch how gradient descent minimizes a loss function. Control learning rate and see the ball roll down the loss curve in real time.",
+            "educationalLevel": "Beginner",
+            "learningResourceType": "Simulation"
+          }
+        },
+        {
+          "@type": "ListItem", "position": 3,
+          "item": {
+            "@type": "LearningResource",
+            "name": "Linear Regression & Polynomial Regression Visualizer",
+            "url": "https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/regression/linear-regression.html",
+            "description": "Least-squares line fit and polynomial curve fit trained with gradient descent. Interactive scatter plot.",
+            "educationalLevel": "Beginner",
+            "learningResourceType": "Simulation"
+          }
+        },
+        {
+          "@type": "ListItem", "position": 4,
+          "item": {
+            "@type": "LearningResource",
+            "name": "Logistic Regression Visualizer",
+            "url": "https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/regression/logistic-regression.html",
+            "description": "Animated sigmoid output and decision boundary on a 2-class scatter dataset. Step-by-step training.",
+            "educationalLevel": "Intermediate",
+            "learningResourceType": "Simulation"
+          }
+        },
+        {
+          "@type": "ListItem", "position": 5,
+          "item": {
+            "@type": "LearningResource",
+            "name": "Artificial Neural Network (ANN) — Forward Pass & Backpropagation",
+            "url": "https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/neural-network/ann.html",
+            "description": "Step-by-step simulation of forward pass and backpropagation on a 1→2→1 network with color-coded chain-rule equations.",
+            "educationalLevel": "Intermediate",
+            "learningResourceType": "Simulation"
+          }
+        }
+      ]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Breadth-First Search (BFS)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Breadth-First Search (BFS) is a graph traversal algorithm that explores all nodes at the current depth level before moving to the next. It uses a queue and guarantees the shortest path in unweighted graphs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is A* search and how does it work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A* is an informed graph search algorithm that uses a heuristic function h(n) to estimate the cost from a node to the goal. It selects nodes by minimizing f(n) = g(n) + h(n), where g(n) is the cost from the start. With an admissible heuristic, A* always finds the optimal path."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is gradient descent in machine learning?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Gradient descent is an optimization algorithm that minimizes a loss function by iteratively moving parameters in the direction of the negative gradient. The learning rate controls the step size. Variants include stochastic gradient descent (SGD), mini-batch, and Adam."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does backpropagation work in a neural network?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Backpropagation computes gradients of the loss with respect to each weight using the chain rule, flowing error signals backwards from the output layer to the input layer. Each weight is then updated by subtracting the gradient multiplied by the learning rate."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What algorithms does this site cover?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This site covers: BFS (Breadth-First Search), DFS (Depth-First Search), UCS (Uniform-Cost Search), IDS (Iterative Deepening Search), A* search, Gradient Descent, Linear Regression, Polynomial Regression, Logistic Regression, and Artificial Neural Networks (ANN) with forward pass and backpropagation."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is this AI/ML visualizer free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. All simulations on this site are completely free and run entirely in your browser — no signup, no installation required. Built by Mahamud Hasan Walid as an open learning resource."
+          }
+        }
+      ]
+    }
+  ]
   </script>
 
   <!-- Favicon — inline SVG graph icon, no file needed -->
@@ -42,6 +170,7 @@
 
   <!-- JetBrains Mono for pseudocode blocks -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" />
 
   <link rel="stylesheet" href="style.css" />
@@ -63,7 +192,7 @@
     <!-- Hero text -->
     <div class="hero">
       <h1>AI / ML Algorithm Visualizer &amp; Simulation</h1>
-      <p>Pick an algorithm to explore it step by step.</p>
+      <p>Step-by-step interactive simulations of <strong>BFS</strong>, <strong>DFS</strong>, <strong>A*</strong>, <strong>Gradient Descent</strong>, <strong>Linear Regression</strong>, <strong>Logistic Regression</strong>, and <strong>Neural Networks (ANN)</strong> — built for students learning AI and ML. No setup. Runs in your browser.</p>
     </div>
 
     <!-- Filter pills: All / AI / ML -->

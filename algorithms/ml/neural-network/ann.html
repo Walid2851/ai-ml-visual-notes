@@ -4,9 +4,90 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Neural Network (ANN) — Forward Pass &amp; Backpropagation Simulation</title>
-  <meta name="description" content="Step-by-step neural network simulation. Watch forward pass and backpropagation on a fixed 1→2→1 network with color-coded equations."/>
+  <meta name="description" content="Step-by-step neural network simulation. Watch forward pass and backpropagation on a fixed 1→2→1 network with color-coded chain-rule equations. Every weight, activation, gradient, and update shown explicitly."/>
+  <meta name="keywords" content="neural network simulation, backpropagation step by step, forward pass neural network, ANN visualization, chain rule gradient, weight update gradient descent, sigmoid activation, deep learning tutorial"/>
   <meta name="author" content="Mahamud Hasan Walid"/>
+  <meta name="robots" content="index, follow"/>
+  <meta name="theme-color" content="#1a1a1a"/>
   <link rel="canonical" href="https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/neural-network/ann.html"/>
+
+  <!-- ── Open Graph ── -->
+  <meta property="og:type"        content="article"/>
+  <meta property="og:url"         content="https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/neural-network/ann.html"/>
+  <meta property="og:title"       content="Neural Network (ANN) — Forward Pass &amp; Backpropagation Simulation"/>
+  <meta property="og:description" content="Watch every step of forward pass and backpropagation on a 1→2→1 neural network — weights, activations, gradients, and updates shown with color-coded equations."/>
+  <meta property="og:image"       content="https://walid2851.github.io/ai-ml-visual-notes/assets/og-preview.png"/>
+  <meta name="twitter:card"       content="summary_large_image"/>
+
+  <!-- ── Structured Data ── -->
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "LearningResource",
+      "name": "Artificial Neural Network (ANN) — Forward Pass & Backpropagation Simulation",
+      "url": "https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/neural-network/ann.html",
+      "description": "Step-by-step interactive simulation of forward pass and backpropagation on a 1→2→1 neural network. Every weight, activation, loss, gradient, and weight update is shown with color-coded chain-rule equations.",
+      "educationalLevel": "Intermediate",
+      "learningResourceType": "Simulation",
+      "inLanguage": "en-US",
+      "isPartOf": { "@type": "WebSite", "url": "https://walid2851.github.io/ai-ml-visual-notes/" },
+      "author": {
+        "@type": "Person",
+        "name": "Mahamud Hasan Walid",
+        "url": "https://walid2851.github.io/",
+        "sameAs": ["https://walid2851.github.io/"]
+      },
+      "teaches": ["Forward pass", "Backpropagation", "Chain rule", "Gradient descent", "Sigmoid activation", "Weight update", "MSE loss"]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the forward pass in a neural network?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The forward pass computes a prediction by passing the input through each layer left to right. At each neuron, the weighted sum z = w·a + b is computed, then the activation a = σ(z) is applied. The final output layer produces the prediction ŷ."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is backpropagation and how does it work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Backpropagation uses the chain rule to compute gradients of the loss with respect to every weight in the network. It flows error signals backwards from the output layer to the input layer. The error signal δ at each layer is: δ = (upstream gradient) × σ′(z). Each weight is then updated as w ← w − η·δ·a."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the chain rule in backpropagation?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The chain rule states that ∂L/∂w = (∂L/∂a) × (∂a/∂z) × (∂z/∂w). In a neural network, this means the gradient of the loss with respect to a weight is the product of all intermediate derivatives along the path from that weight to the loss output."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the sigmoid activation function?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The sigmoid function σ(z) = 1 / (1 + e⁻ᶻ) squashes any real number into the range (0, 1). Its derivative is σ′(z) = σ(z) × (1 − σ(z)) = a × (1 − a), which is used during backpropagation."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is the MSE loss computed in a neural network?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Mean Squared Error (MSE) loss is L = ½(y − ŷ)², where y is the true label and ŷ is the network's prediction. The ½ factor simplifies the derivative: ∂L/∂ŷ = −(y − ŷ)."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='6' cy='16' r='5' fill='%237C3AED'/><circle cx='26' cy='6' r='5' fill='%237C3AED'/><circle cx='26' cy='26' r='5' fill='%237C3AED'/><line x1='11' y1='14' x2='21' y2='8' stroke='%237C3AED' stroke-width='2'/><line x1='11' y1='18' x2='21' y2='24' stroke='%237C3AED' stroke-width='2'/></svg>"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
