@@ -35,6 +35,9 @@
           <a href="${base}/index.html" class="nav-link">Home</a>
           <a href="${base}/index.html?cat=ai" class="nav-link">AI</a>
           <a href="${base}/index.html?cat=ml" class="nav-link">ML</a>
+          <a href="https://walid2851.github.io/" class="nav-portfolio" target="_blank" rel="noopener">
+            Visit Portfolio ↗
+          </a>
         </div>
 
       </div>

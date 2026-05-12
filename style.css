@@ -189,6 +189,27 @@ p  { color: var(--text-secondary); }
   color: #ffffff;
 }
 
+.nav-portfolio {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.9rem;
+  margin-left: 0.4rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(232, 132, 122, 0.6);
+  color: #E8847A;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.nav-portfolio:hover {
+  background: rgba(232, 132, 122, 0.12);
+  border-color: #E8847A;
+  color: #f0a09a;
+}
+
 /* ============================================================
    HOMEPAGE — hero, filter bar, card grid
    ============================================================ */
