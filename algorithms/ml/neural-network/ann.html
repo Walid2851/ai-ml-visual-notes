@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neural Network (ANN) — Forward Pass &amp; Backpropagation Simulation</title>
+  <meta name="description" content="Step-by-step neural network simulation. Watch forward pass and backpropagation on a fixed 1→2→1 network with color-coded equations."/>
+  <meta name="author" content="Mahamud Hasan Walid"/>
+  <link rel="canonical" href="https://walid2851.github.io/ai-ml-visual-notes/algorithms/ml/neural-network/ann.html"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='6' cy='16' r='5' fill='%237C3AED'/><circle cx='26' cy='6' r='5' fill='%237C3AED'/><circle cx='26' cy='26' r='5' fill='%237C3AED'/><line x1='11' y1='14' x2='21' y2='8' stroke='%237C3AED' stroke-width='2'/><line x1='11' y1='18' x2='21' y2='24' stroke='%237C3AED' stroke-width='2'/></svg>"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"/>
+  <link rel="stylesheet" href="../../../style.css"/>
+  <style>
+    :root { --accent-algo: #8B5CF6; }
+
+    .page-content {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .section {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .section-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent-algo);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .section-tag::after {
+      content: '';
+      flex: 1;
+      height: 1.5px;
+      background: color-mix(in srgb, var(--accent-algo) 25%, transparent);
+    }
+
+    .insight-box {
+      border-left: 3px solid var(--accent-algo);
+      background: color-mix(in srgb, var(--accent-algo) 8%, white);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 0.85rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .props-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .props-table th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .props-table td {
+      padding: 0.55rem 0.75rem;
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .props-table td:first-child { font-weight: 600; width: 130px; color: var(--accent-algo); }
+
+    /* ── Network SVG wrap ── */
+    .svg-wrap {
+      border: 1.5px solid #D5CFC6;
+      border-radius: var(--radius-md);
+      background: #EEE9E1;
+      padding: 0.75rem 0.5rem;
+      overflow-x: auto;
+    }
+    #ann-svg {
+      display: block;
+      width: 100%;
+      min-width: 600px;
+    }
+
+    /* ── SVG highlight classes — change fill + stroke, keep text white ── */
+    #ann-svg .hl-fwd circle,
+    #ann-svg .hl-fwd rect {
+      fill:   #5A8EC8 !important;
+      stroke: #34689E !important;
+      stroke-width: 3 !important;
+    }
+    #ann-svg line.hl-fwd {
+      stroke: #5A8EC8 !important;
+      stroke-width: 2.5 !important;
+      opacity: 1 !important;
+    }
+    #ann-svg .hl-bwd circle,
+    #ann-svg .hl-bwd rect {
+      fill:   #C85A5A !important;
+      stroke: #963030 !important;
+      stroke-width: 3 !important;
+    }
+    #ann-svg line.hl-bwd {
+      stroke: #C85A5A !important;
+      stroke-width: 2.5 !important;
+      opacity: 1 !important;
+    }
+    #ann-svg .hl-loss circle,
+    #ann-svg .hl-loss rect {
+      fill:   #D97B20 !important;
+      stroke: #A85A10 !important;
+      stroke-width: 3 !important;
+    }
+    #ann-svg .hl-update circle,
+    #ann-svg .hl-update rect {
+      fill:   #2D7A3E !important;
+      stroke: #1D5228 !important;
+      stroke-width: 3 !important;
+    }
+    #ann-svg line.hl-update {
+      stroke: #2D7A3E !important;
+      stroke-width: 2.5 !important;
+      opacity: 1 !important;
+    }
+    /* keep all text white inside any highlighted node */
+    #ann-svg .hl-fwd text,
+    #ann-svg .hl-bwd text,
+    #ann-svg .hl-loss text,
+    #ann-svg .hl-update text {
+      fill: white !important;
+    }
+
+    /* ── Step info panel ── */
+    .step-info {
+      border-radius: var(--radius-sm);
+      padding: 1.1rem 1.25rem;
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 0.875rem;
+      line-height: 1.8;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      min-height: 90px;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .step-info.phase-forward  { background: #EEF4FA; border-color: #A8C5E2; }
+    .step-info.phase-backward { background: #FAF0F0; border-color: #DFA8A8; }
+    .step-info.phase-loss     { background: #FDF8EE; border-color: #E8C97A; }
+    .step-info.phase-update   { background: #EEF8F1; border-color: #8ECDA0; }
+
+    .step-title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.92rem;
+      letter-spacing: -0.1px;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .phase-badge {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+    }
+    .badge-setup    { background: #F3F4F6; color: #6B7280; }
+    .badge-forward  { background: #D8E9F7; color: #2A5E8E; }
+    .badge-backward { background: #F7DEDE; color: #8E2A2A; }
+    .badge-loss     { background: #FBF0D8; color: #8E5A10; }
+    .badge-update   { background: #D8F0E0; color: #1D5228; }
+
+    .eq-line { margin: 0.15rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; }
+    .eq-f  { color: #374151; }
+    .eq-s  { color: #34689E; }
+    .eq-r  { color: #1D5228; font-weight: 600; }
+    .eq-b  { color: #963030; }
+    .eq-g  { color: #963030; font-weight: 600; }
+
+    .vbox {
+      display: inline-block;
+      padding: 0.08rem 0.45rem;
+      border-radius: 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .vbox-b { background: #E6F0FA; border: 1px solid #93BEE0; color: #2A5E8E; }
+    .vbox-r { background: #FAF0F0; border: 1px solid #E0A0A0; color: #8E2A2A; }
+    .vbox-g { background: #E8F6EE; border: 1px solid #7DC499; color: #1D5228; }
+
+    /* ── Weights display ── */
+    .weights-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .weight-group {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+    }
+    .weight-group h4 {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+    .weight-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.28rem 0;
+      border-top: 1px solid var(--border);
+      font-size: 0.86rem;
+    }
+    .weight-row:first-of-type { border-top: none; }
+    .wname { font-weight: 600; color: var(--accent-algo); }
+    .wval  { font-family: "JetBrains Mono", monospace; }
+    .wval.updated { color: #059669; font-weight: 700; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .step-ctr {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      gap: 1.1rem;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+      align-items: center;
+    }
+    .leg-item { display: flex; align-items: center; gap: 0.35rem; color: var(--text-secondary); }
+    .leg-dot {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      border: 2px solid;
+      flex-shrink: 0;
+    }
+
+    /* ── Pseudocode ── */
+    .pseudocode {
+      background: #1C1C1E;
+      color: #E8E8E8;
+      border-radius: var(--radius-sm);
+      padding: 1.1rem 1.4rem;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.82rem;
+      line-height: 1.85;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .kw  { color: #CF9DFF; }
+    .fn  { color: #79C0FF; }
+    .cm  { color: #6A737D; font-style: italic; }
+    .num { color: #F97583; }
+
+    /* ── Chain-rule display in step panel ── */
+    .chain-rule {
+      background: #F8F9FA;
+      border-left: 3px solid #C0A0A0;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 0.55rem 0.9rem;
+      margin: 0.45rem 0 0.25rem;
+    }
+    .chain-row {
+      display: grid;
+      grid-template-columns: 118px 16px 1fr;
+      align-items: baseline;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.8;
+    }
+    .chain-lhs { color: #374151; font-weight: 600; }
+    .chain-op  { color: #B0B8C1; text-align: center; }
+    .chain-rhs { color: #34689E; }
+    .chain-result { color: #8E2A2A; font-weight: 700; }
+    .chain-sub { font-size: 0.75rem; color: #8A93A0; font-style: italic; }
+
+    @media (max-width: 640px) {
+      .page-content   { padding: 1rem; gap: 1rem; }
+      .section        { padding: 1.1rem; }
+      .weights-grid   { grid-template-columns: 1fr; }
+      .step-ctr       { margin-left: 0; width: 100%; text-align: right; }
+    }
+  </style>
+</head>
+<body>
+
+  <script src="../../../components/nav.js"></script>
+
+  <div class="page-content">
+
+    <!-- ── THEORY ─────────────────────────── -->
+    <section class="section">
+      <div class="section-tag">Theory</div>
+      <div>
+        <h2>Artificial Neural Network — Forward Pass &amp; Backpropagation</h2>
+        <p style="color:var(--text-secondary);margin-top:0.25rem">
+          A fixed <strong>1 → 2 → 1</strong> network trained on one example, every calculation shown step by step.
+        </p>
+      </div>
+
+      <div class="insight-box">
+        A neural network learns in three phases: <strong>(1) Forward Pass</strong> — compute predictions layer by layer,
+        <strong>(2) Backpropagation</strong> — use the chain rule to find how much each weight contributed to the error,
+        <strong>(3) Weight Update</strong> — nudge each weight in the direction that reduces the error.
+      </div>
+
+      <table class="props-table">
+        <thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>z</td><td>Weighted sum &nbsp;<code>z = w·a + b</code> — the "pre-activation" of a neuron.</td></tr>
+          <tr><td>a</td><td>Activation &nbsp;<code>a = σ(z)</code> — the output of a neuron after the sigmoid.</td></tr>
+          <tr><td>σ(z)</td><td>Sigmoid: &nbsp;<code>1 / (1 + e⁻ᶻ)</code> — squashes any value into (0, 1).</td></tr>
+          <tr><td>σ′(z)</td><td>Sigmoid derivative: &nbsp;<code>σ(z)·(1−σ(z)) = a·(1−a)</code>.</td></tr>
+          <tr><td>L</td><td>MSE loss: &nbsp;<code>½(y − ŷ)²</code>.</td></tr>
+          <tr><td>δ (delta)</td><td>Error signal at a layer — gradient of L w.r.t. z at that layer.</td></tr>
+          <tr><td>η</td><td>Learning rate — how large each weight update step is.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="pseudocode"><span class="cm">// Forward pass</span>
+<span class="kw">for each</span> layer l <span class="kw">from</span> <span class="num">1</span> <span class="kw">to</span> L:
+    z[l] = W[l] · a[l-1] + b[l]
+    a[l] = σ(z[l])
+
+<span class="cm">// Backprop (output layer first, then hidden layers)</span>
+δ[L] = (a[L] − y) · σ′(z[L])
+<span class="kw">for each</span> layer l <span class="kw">from</span> L-1 <span class="kw">down to</span> <span class="num">1</span>:
+    δ[l] = (W[l+1]ᵀ · δ[l+1]) · σ′(z[l])
+
+<span class="cm">// Weight update</span>
+<span class="kw">for each</span> layer l:
+    W[l] -= η · δ[l] · a[l-1]ᵀ
+    b[l] -= η · δ[l]</div>
+    </section>
+
+    <!-- ── FIXED EXAMPLE ──────────────────── -->
+    <section class="section">
+      <div class="section-tag">Fixed Example</div>
+
+      <div>
+        <h3 style="margin-bottom:0.3rem">Network &amp; Input</h3>
+        <p style="color:var(--text-secondary);font-size:0.9rem">
+          Architecture: <strong>1 input → 2 hidden → 1 output</strong> &nbsp;|&nbsp;
+          Activation: <strong>sigmoid</strong> everywhere &nbsp;|&nbsp;
+          Loss: <strong>½(y−ŷ)²</strong>
+        </p>
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:0.25rem">
+          <strong>x = 0.5</strong> &nbsp; (input) &nbsp;&nbsp; <strong>y = 1.0</strong> &nbsp; (label) &nbsp;&nbsp; <strong>η = 0.5</strong> &nbsp; (learning rate)
+        </p>
+      </div>
+
+      <div class="weights-grid" id="weights-display">
+        <div class="weight-group">
+          <h4>Input → Hidden &nbsp;(Layer 1)</h4>
+          <div class="weight-row"><span class="wname">w₁⁽¹⁾</span><span class="wval" id="wv-w1">0.5</span></div>
+          <div class="weight-row"><span class="wname">w₂⁽¹⁾</span><span class="wval" id="wv-w2">0.3</span></div>
+          <div class="weight-row"><span class="wname">b₁⁽¹⁾</span><span class="wval" id="wv-b1a">0.2</span></div>
+          <div class="weight-row"><span class="wname">b₂⁽¹⁾</span><span class="wval" id="wv-b1b">0.2</span></div>
+        </div>
+        <div class="weight-group">
+          <h4>Hidden → Output &nbsp;(Layer 2)</h4>
+          <div class="weight-row"><span class="wname">w₁⁽²⁾</span><span class="wval" id="wv-W1">0.4</span></div>
+          <div class="weight-row"><span class="wname">w₂⁽²⁾</span><span class="wval" id="wv-W2">0.6</span></div>
+          <div class="weight-row"><span class="wname">b⁽²⁾</span><span class="wval" id="wv-b2">0.1</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SIMULATION ─────────────────────── -->
+    <section class="section">
+      <div class="section-tag">Simulation</div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="leg-item">
+          <div class="leg-dot" style="border-color:#6B7280;background:#9CA3AF"></div>
+          <span>Idle</span>
+        </div>
+        <div class="leg-item">
+          <div class="leg-dot" style="border-color:#34689E;background:#5A8EC8"></div>
+          <span style="color:#34689E;font-weight:600">Forward active</span>
+        </div>
+        <div class="leg-item">
+          <div class="leg-dot" style="border-color:#963030;background:#C85A5A"></div>
+          <span style="color:#963030;font-weight:600">Backward active</span>
+        </div>
+        <div class="leg-item">
+          <div class="leg-dot" style="border-color:#1D5228;background:#2D7A3E"></div>
+          <span style="color:#1D5228;font-weight:600">Update</span>
+        </div>
+      </div>
+
+      <!-- Network SVG -->
+      <div class="svg-wrap">
+        <svg id="ann-svg" viewBox="0 0 730 295" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#B5AFA8"/>
+            </marker>
+            <marker id="arr-fwd" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#5A8EC8"/>
+            </marker>
+            <marker id="arr-bwd" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#C85A5A"/>
+            </marker>
+            <marker id="arr-upd" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#2D7A3E"/>
+            </marker>
+          </defs>
+
+          <!-- ── EDGES ── -->
+          <line id="edge-x-h1"   x1="107" y1="131" x2="277" y2="106" stroke="#C0BAB2" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line id="edge-x-h2"   x1="107" y1="149" x2="277" y2="174" stroke="#C0BAB2" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line id="edge-b1-h1"  x1="204" y1="48"  x2="283" y2="76"  stroke="#C8C3BB" stroke-width="1"   stroke-dasharray="4,3" marker-end="url(#arr)"/>
+          <line id="edge-b1-h2"  x1="198" y1="52"  x2="283" y2="162" stroke="#C8C3BB" stroke-width="1"   stroke-dasharray="4,3" marker-end="url(#arr)"/>
+          <line id="edge-h1-out" x1="346" y1="105" x2="468" y2="132" stroke="#C0BAB2" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line id="edge-h2-out" x1="346" y1="175" x2="468" y2="148" stroke="#C0BAB2" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line id="edge-b2-out" x1="422" y1="50"  x2="478" y2="112" stroke="#C8C3BB" stroke-width="1"   stroke-dasharray="4,3" marker-end="url(#arr)"/>
+          <line id="edge-out-p"  x1="534" y1="140" x2="556" y2="140" stroke="#C0BAB2" stroke-width="1.5" marker-end="url(#arr)"/>
+
+          <!-- ── WEIGHT LABELS ── -->
+          <text x="186" y="112" fill="#78716C" font-size="11" text-anchor="middle" font-family="'JetBrains Mono', monospace">w₁⁽¹⁾</text>
+          <text x="186" y="170" fill="#78716C" font-size="11" text-anchor="middle" font-family="'JetBrains Mono', monospace">w₂⁽¹⁾</text>
+          <text x="408" y="110" fill="#78716C" font-size="11" text-anchor="middle" font-family="'JetBrains Mono', monospace">w₁⁽²⁾</text>
+          <text x="408" y="178" fill="#78716C" font-size="11" text-anchor="middle" font-family="'JetBrains Mono', monospace">w₂⁽²⁾</text>
+
+          <!-- ── INPUT NODE ── -->
+          <g id="node-input">
+            <circle cx="75" cy="140" r="32" fill="#5A8EC8" stroke="#34689E" stroke-width="2.5"/>
+            <text x="75" y="135" fill="white" font-size="13" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="700">x</text>
+            <text x="75" y="150" fill="rgba(255,255,255,0.8)" font-size="8" text-anchor="middle" font-family="'JetBrains Mono', monospace">a⁽¹⁾=x</text>
+          </g>
+          <text x="75" y="100" fill="#78716C" font-size="10" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="500" letter-spacing="0.3">Input</text>
+
+          <!-- ── BIAS 1 ── -->
+          <g id="node-b1">
+            <circle cx="190" cy="33" r="19" fill="#A8A29E" stroke="#78716C" stroke-width="1.5" stroke-dasharray="4,2.5"/>
+            <text x="190" y="29" fill="white" font-size="9" text-anchor="middle" font-family="'JetBrains Mono', monospace">b⁽¹⁾</text>
+            <text x="190" y="42" fill="white" font-size="9" text-anchor="middle" font-family="'JetBrains Mono', monospace">0.2</text>
+          </g>
+
+          <!-- ── HIDDEN NEURON 1 (split circle) ── -->
+          <g id="node-h1">
+            <circle cx="311" cy="95" r="35" fill="#9CA3AF" stroke="#6B7280" stroke-width="2.5"/>
+            <line x1="311" y1="60" x2="311" y2="130" stroke="white" stroke-width="1.5" opacity="0.4"/>
+            <!-- z side -->
+            <text x="294" y="87"  fill="white" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="600">z₁⁽²⁾</text>
+            <text id="h1-z-val" x="294" y="112" fill="rgba(255,255,255,0.75)" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace">—</text>
+            <!-- a side -->
+            <text x="328" y="87"  fill="white" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="600">a₁⁽²⁾</text>
+            <text id="h1-a-val" x="328" y="112" fill="rgba(255,255,255,0.75)" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace">—</text>
+          </g>
+
+          <!-- ── HIDDEN NEURON 2 (split circle) ── -->
+          <g id="node-h2">
+            <circle cx="311" cy="185" r="35" fill="#9CA3AF" stroke="#6B7280" stroke-width="2.5"/>
+            <line x1="311" y1="150" x2="311" y2="220" stroke="white" stroke-width="1.5" opacity="0.4"/>
+            <text x="294" y="177" fill="white" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="600">z₂⁽²⁾</text>
+            <text id="h2-z-val" x="294" y="202" fill="rgba(255,255,255,0.75)" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace">—</text>
+            <text x="328" y="177" fill="white" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="600">a₂⁽²⁾</text>
+            <text id="h2-a-val" x="328" y="202" fill="rgba(255,255,255,0.75)" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace">—</text>
+          </g>
+
+          <text x="311" y="274" fill="#78716C" font-size="10" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="500" letter-spacing="0.3">Hidden Layer</text>
+
+          <!-- ── BIAS 2 ── -->
+          <g id="node-b2">
+            <circle cx="412" cy="33" r="19" fill="#A8A29E" stroke="#78716C" stroke-width="1.5" stroke-dasharray="4,2.5"/>
+            <text x="412" y="29" fill="white" font-size="9" text-anchor="middle" font-family="'JetBrains Mono', monospace">b⁽²⁾</text>
+            <text x="412" y="42" fill="white" font-size="9" text-anchor="middle" font-family="'JetBrains Mono', monospace">0.1</text>
+          </g>
+
+          <!-- ── OUTPUT NEURON (split circle) ── -->
+          <g id="node-out">
+            <circle cx="501" cy="140" r="33" fill="#9CA3AF" stroke="#6B7280" stroke-width="2.5"/>
+            <line x1="501" y1="107" x2="501" y2="173" stroke="white" stroke-width="1.5" opacity="0.4"/>
+            <text x="484" y="133" fill="white" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="600">z⁽³⁾</text>
+            <text id="out-z-val" x="484" y="157" fill="rgba(255,255,255,0.75)" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace">—</text>
+            <text x="518" y="133" fill="white" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="600">a⁽³⁾</text>
+            <text id="out-a-val" x="518" y="157" fill="rgba(255,255,255,0.75)" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace">—</text>
+          </g>
+          <text x="501" y="188" fill="#78716C" font-size="10" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="500" letter-spacing="0.3">Output</text>
+
+          <!-- ── PREDICTION BOX ── -->
+          <g id="node-pred">
+            <rect x="554" y="118" width="54" height="44" rx="6" fill="#D97B20" stroke="#A85A10" stroke-width="2"/>
+            <text x="581" y="134" fill="white" font-size="13" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="700">ŷ</text>
+            <text id="pred-val" x="581" y="152" fill="rgba(255,255,255,0.85)" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace">—</text>
+          </g>
+          <text x="581" y="174" fill="#78716C" font-size="10" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="500" letter-spacing="0.3">Pred.</text>
+
+          <!-- ── LABEL BOX ── -->
+          <g id="node-lbl">
+            <rect x="620" y="118" width="54" height="44" rx="6" fill="#2D7A3E" stroke="#1D5228" stroke-width="2"/>
+            <text x="647" y="134" fill="white" font-size="13" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="700">y</text>
+            <text x="647" y="152" fill="rgba(255,255,255,0.85)" font-size="9"  text-anchor="middle" font-family="'JetBrains Mono', monospace">1.0</text>
+          </g>
+          <text x="647" y="174" fill="#78716C" font-size="10" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="500" letter-spacing="0.3">Label</text>
+
+          <!-- divider between pred/label -->
+          <line x1="614" y1="118" x2="614" y2="162" stroke="#C0BAB2" stroke-width="1.5"/>
+          <text x="614" y="113" fill="#A8A29E" font-size="9" text-anchor="middle">|</text>
+
+          <!-- ── GRADIENT ANNOTATIONS (backprop — filled via svgUp) ── -->
+          <!-- δ values on nodes (appear below node circles) -->
+          <text id="gv-delta3" x="501" y="202" fill="#8E2A2A" font-size="8.5" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="700"></text>
+          <text id="gv-delta1" x="355" y="98"  fill="#8E2A2A" font-size="8.5" text-anchor="start"  font-family="'JetBrains Mono', monospace" font-weight="700"></text>
+          <text id="gv-delta2" x="355" y="188" fill="#8E2A2A" font-size="8.5" text-anchor="start"  font-family="'JetBrains Mono', monospace" font-weight="700"></text>
+          <!-- ∂L/∂w values on edges (appear near edge midpoints) -->
+          <text id="gv-dW1"   x="394" y="131" fill="#8E2A2A" font-size="8.5" text-anchor="middle" font-family="'JetBrains Mono', monospace"></text>
+          <text id="gv-dW2"   x="394" y="155" fill="#8E2A2A" font-size="8.5" text-anchor="middle" font-family="'JetBrains Mono', monospace"></text>
+          <text id="gv-dw1"   x="183" y="132" fill="#8E2A2A" font-size="8.5" text-anchor="middle" font-family="'JetBrains Mono', monospace"></text>
+          <text id="gv-dw2"   x="183" y="152" fill="#8E2A2A" font-size="8.5" text-anchor="middle" font-family="'JetBrains Mono', monospace"></text>
+        </svg>
+      </div>
+
+      <!-- Step Info Panel -->
+      <div class="step-info phase-setup" id="step-info">
+        <div class="step-title">
+          <span id="step-title-text">Network Overview</span>
+          <span class="phase-badge badge-setup" id="phase-badge">Setup</span>
+        </div>
+        <div id="step-body">
+          Press <strong>Next Step →</strong> to begin. The forward pass computes predictions left to right, then backprop flows gradients right to left.
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn" id="btn-prev" onclick="changeStep(-1)" disabled>← Prev</button>
+        <button class="btn btn-primary" id="btn-next" onclick="changeStep(1)">Next Step →</button>
+        <button class="btn" onclick="resetSim()">↺ Reset</button>
+        <span class="step-ctr" id="step-ctr">Step 0 / 13</span>
+      </div>
+
+    </section>
+
+  </div><!-- /page-content -->
+
+  <script>
+  // ── Fixed network ────────────────────────────────────
+  const X = 0.5, Y = 1.0, LR = 0.5;
+  const W = { w1:0.5, w2:0.3, b1a:0.2, b1b:0.2, W1:0.4, W2:0.6, b2:0.1 };
+
+  function sig(z)  { return 1 / (1 + Math.exp(-z)); }
+  function f(v, d) { return v.toFixed(d ?? 4); }
+
+  // ── Pre-compute all forward values ───────────────────
+  const z1   = W.w1 * X + W.b1a;
+  const a1   = sig(z1);
+  const z2   = W.w2 * X + W.b1b;
+  const a2   = sig(z2);
+  const z3   = W.W1 * a1 + W.W2 * a2 + W.b2;
+  const yhat = sig(z3);
+  const loss = 0.5 * (Y - yhat) ** 2;
+
+  // ── Backprop values ───────────────────────────────────
+  const dL_dyhat  = -(Y - yhat);
+  const dyhat_dz3 = yhat * (1 - yhat);
+  const delta3    = dL_dyhat * dyhat_dz3;
+
+  const dL_dW1 = delta3 * a1;
+  const dL_dW2 = delta3 * a2;
+  const dL_db2 = delta3;
+
+  const dL_da1  = delta3 * W.W1;
+  const da1_dz1 = a1 * (1 - a1);
+  const delta1  = dL_da1 * da1_dz1;
+
+  const dL_da2  = delta3 * W.W2;
+  const da2_dz2 = a2 * (1 - a2);
+  const delta2  = dL_da2 * da2_dz2;
+
+  const dL_dw1 = delta1 * X;
+  const dL_dw2 = delta2 * X;
+
+  // ── New weights after update ──────────────────────────
+  const nw1  = W.w1  - LR * dL_dw1;
+  const nw2  = W.w2  - LR * dL_dw2;
+  const nW1  = W.W1  - LR * dL_dW1;
+  const nW2  = W.W2  - LR * dL_dW2;
+  const nb2  = W.b2  - LR * dL_db2;
+
+  // New loss (sanity check)
+  const nz1  = nw1 * X + W.b1a;
+  const na1  = sig(nz1);
+  const nz2  = nw2 * X + W.b1b;
+  const na2  = sig(nz2);
+  const nz3  = nW1 * na1 + nW2 * na2 + nb2;
+  const nyhat = sig(nz3);
+  const nloss = 0.5 * (Y - nyhat) ** 2;
+
+  // ── Helper: value box HTML ────────────────────────────
+  const vb = (v, cls='b') => `<span class="vbox vbox-${cls}">${v}</span>`;
+
+  // ── Helper: chain-rule rows ───────────────────────────
+  function cr(lhs, rhs, sub='') {
+    return `<div class="chain-row">
+      <span class="chain-lhs">${lhs}</span>
+      <span class="chain-op">=</span>
+      <span class="chain-rhs">${rhs}${sub ? `<span class="chain-sub"> &nbsp;(${sub})</span>` : ''}</span>
+    </div>`;
+  }
+  function crResult(lhs, rhs) {
+    return `<div class="chain-row">
+      <span class="chain-lhs">${lhs}</span>
+      <span class="chain-op">=</span>
+      <span class="chain-result">${rhs}</span>
+    </div>`;
+  }
+
+  // ── Steps ─────────────────────────────────────────────
+  const steps = [
+    {
+      phase:'setup', title:'Network Overview',
+      hn:[], he:[],
+      svgUp:[],
+      body:`<div class="eq-line">Architecture: 1 input → 2 hidden neurons → 1 output. Sigmoid everywhere.</div>
+            <div class="eq-line">Input: ${vb('x = '+X)} &nbsp; Label: ${vb('y = '+Y,'g')} &nbsp; Learning rate: ${vb('η = '+LR)}</div>
+            <div class="eq-line" style="margin-top:0.3rem;color:#6B7280">Press <strong>Next Step →</strong> to begin the forward pass.</div>`
+    },
+
+    // ── FORWARD PASS ─────────────────────────────────────
+    {
+      phase:'forward', title:'Forward: Compute z₁⁽²⁾',
+      hn:['node-input','node-h1','node-b1'], he:['edge-x-h1','edge-b1-h1'],
+      svgUp:[['h1-z-val', f(z1)]],
+      body:`<div class="eq-line eq-f">z₁⁽²⁾ &nbsp;= &nbsp;w₁⁽¹⁾ · x &nbsp;+ &nbsp;b₁⁽¹⁾</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;${W.w1} × ${X} &nbsp;+ &nbsp;${W.b1a}</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;${W.w1*X} + ${W.b1a}</div>
+            <div class="eq-line eq-r">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;${vb(f(z1),'b')}</div>`
+    },
+    {
+      phase:'forward', title:'Forward: Compute a₁⁽²⁾ = σ(z₁⁽²⁾)',
+      hn:['node-h1'], he:[],
+      svgUp:[['h1-a-val', f(a1)]],
+      body:`<div class="eq-line eq-f">a₁⁽²⁾ &nbsp;= &nbsp;σ(z₁⁽²⁾) = 1 / (1 + e<sup>−z₁</sup>)</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;1 / (1 + e<sup>−${f(z1)}</sup>)</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;1 / (1 + ${f(Math.exp(-z1))})</div>
+            <div class="eq-line eq-r">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;${vb(f(a1),'b')}</div>`
+    },
+    {
+      phase:'forward', title:'Forward: Compute z₂⁽²⁾',
+      hn:['node-input','node-h2','node-b1'], he:['edge-x-h2','edge-b1-h2'],
+      svgUp:[['h2-z-val', f(z2)]],
+      body:`<div class="eq-line eq-f">z₂⁽²⁾ &nbsp;= &nbsp;w₂⁽¹⁾ · x &nbsp;+ &nbsp;b₂⁽¹⁾</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;${W.w2} × ${X} &nbsp;+ &nbsp;${W.b1b}</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;${W.w2*X} + ${W.b1b}</div>
+            <div class="eq-line eq-r">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;${vb(f(z2),'b')}</div>`
+    },
+    {
+      phase:'forward', title:'Forward: Compute a₂⁽²⁾ = σ(z₂⁽²⁾)',
+      hn:['node-h2'], he:[],
+      svgUp:[['h2-a-val', f(a2)]],
+      body:`<div class="eq-line eq-f">a₂⁽²⁾ &nbsp;= &nbsp;σ(z₂⁽²⁾) = 1 / (1 + e<sup>−z₂</sup>)</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;1 / (1 + e<sup>−${f(z2)}</sup>)</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;1 / (1 + ${f(Math.exp(-z2))})</div>
+            <div class="eq-line eq-r">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;${vb(f(a2),'b')}</div>`
+    },
+    {
+      phase:'forward', title:'Forward: Compute z⁽³⁾ (output weighted sum)',
+      hn:['node-h1','node-h2','node-out','node-b2'], he:['edge-h1-out','edge-h2-out','edge-b2-out'],
+      svgUp:[['out-z-val', f(z3)]],
+      body:`<div class="eq-line eq-f">z⁽³⁾ &nbsp;= &nbsp;w₁⁽²⁾·a₁⁽²⁾ + w₂⁽²⁾·a₂⁽²⁾ + b⁽²⁾</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;${W.W1}×${f(a1)} &nbsp;+ &nbsp;${W.W2}×${f(a2)} &nbsp;+ &nbsp;${W.b2}</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;${f(W.W1*a1)} + ${f(W.W2*a2)} + ${W.b2}</div>
+            <div class="eq-line eq-r">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;${vb(f(z3),'b')}</div>`
+    },
+    {
+      phase:'forward', title:'Forward: Compute ŷ = σ(z⁽³⁾)',
+      hn:['node-out','node-pred'], he:['edge-out-p'],
+      svgUp:[['out-a-val', f(yhat)], ['pred-val', f(yhat)]],
+      body:`<div class="eq-line eq-f">ŷ &nbsp;= &nbsp;a⁽³⁾ = σ(z⁽³⁾) = 1 / (1 + e<sup>−z⁽³⁾</sup>)</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;= &nbsp;1 / (1 + e<sup>−${f(z3)}</sup>)</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;= &nbsp;1 / (1 + ${f(Math.exp(-z3))})</div>
+            <div class="eq-line eq-r">&nbsp;&nbsp;&nbsp;ŷ = ${vb(f(yhat),'b')}</div>`
+    },
+
+    // ── LOSS ─────────────────────────────────────────────
+    {
+      phase:'loss', title:'Compute Loss L',
+      hn:['node-pred','node-lbl'], he:[],
+      svgUp:[],
+      body:`<div class="eq-line eq-f">L(y, ŷ) &nbsp;= &nbsp;½(y − ŷ)²</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;½(${Y} − ${f(yhat)})²</div>
+            <div class="eq-line eq-s">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= &nbsp;½ × ${f((Y-yhat)**2)}</div>
+            <div class="eq-line eq-r">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L = ${vb(f(loss),'b')}</div>
+            <div class="eq-line" style="margin-top:0.35rem;color:#92400E">Prediction ${f(yhat)} vs label ${Y} — now backpropagate this error.</div>`
+    },
+
+    // ── BACKPROP — 9 granular steps ───────────────────────
+
+    // B1: Loss gradient ∂L/∂ŷ
+    {
+      phase:'backward', title:'Backprop Step 1 — Loss gradient ∂L/∂ŷ',
+      hn:['node-pred','node-lbl'], he:[],
+      svgUp:[],
+      body:`<div class="eq-line eq-f" style="margin-bottom:0.25rem">
+              The loss is <code>L = ½(y−ŷ)²</code>. Differentiate w.r.t. ŷ:
+            </div>
+            <div class="chain-rule">
+              ${cr('∂L/∂ŷ', '−(y − ŷ)')}
+              ${cr('', `−(${Y} − ${f(yhat)})`)}
+              ${crResult('', vb(f(dL_dyhat),'r'))}
+            </div>
+            <div class="eq-line" style="color:#78716C;font-size:0.8rem">This tells us the direction of error — positive means ŷ is too high, negative means too low.</div>`
+    },
+
+    // B2: Sigmoid derivative σ'(z³)
+    {
+      phase:'backward', title:'Backprop Step 2 — Sigmoid derivative σ′(z⁽³⁾)',
+      hn:['node-out'], he:[],
+      svgUp:[],
+      body:`<div class="eq-line eq-f" style="margin-bottom:0.25rem">
+              To "undo" the sigmoid at the output we need its derivative: <code>σ′(z) = a(1−a)</code>
+            </div>
+            <div class="chain-rule">
+              ${cr('∂ŷ/∂z⁽³⁾', 'ŷ · (1 − ŷ)', 'sigmoid derivative')}
+              ${cr('', `${f(yhat)} × ${f(1-yhat)}`)}
+              ${crResult('', vb(f(dyhat_dz3),'r'))}
+            </div>`
+    },
+
+    // B3: δ³ — output delta
+    {
+      phase:'backward', title:'Backprop Step 3 — Output error signal δ⁽³⁾',
+      hn:['node-out'], he:[],
+      svgUp:[['gv-delta3', 'δ³='+f(delta3)]],
+      body:`<div class="eq-line eq-f" style="margin-bottom:0.25rem">
+              Combine the two using the <strong>chain rule</strong>. δ⁽³⁾ is the "error signal" at the output z:
+            </div>
+            <div class="chain-rule">
+              ${cr('δ⁽³⁾', '∂L/∂ŷ · ∂ŷ/∂z⁽³⁾', 'chain rule')}
+              ${cr('', `${f(dL_dyhat)} × ${f(dyhat_dz3)}`)}
+              ${crResult('δ⁽³⁾', vb(f(delta3),'r'))}
+            </div>
+            <div class="eq-line" style="color:#78716C;font-size:0.8rem">δ⁽³⁾ is now shown on the network diagram. It drives all output-layer gradient computations.</div>`
+    },
+
+    // B4: ∂L/∂w₁⁽²⁾
+    {
+      phase:'backward', title:'Backprop Step 4 — Gradient ∂L/∂w₁⁽²⁾',
+      hn:['node-h1','node-out'], he:['edge-h1-out'],
+      svgUp:[['gv-dW1', '∂L/∂w₁='+f(dL_dW1)]],
+      body:`<div class="eq-line eq-f" style="margin-bottom:0.25rem">
+              <code>w₁⁽²⁾</code> only enters the network through <code>z⁽³⁾ = w₁⁽²⁾·a₁ + …</code>, so <code>∂z³/∂w₁⁽²⁾ = a₁⁽²⁾</code>:
+            </div>
+            <div class="chain-rule">
+              ${cr('∂L/∂w₁⁽²⁾', '∂L/∂z⁽³⁾ · ∂z⁽³⁾/∂w₁⁽²⁾', 'chain rule')}
+              ${cr('', 'δ⁽³⁾ · a₁⁽²⁾')}
+              ${cr('', `${f(delta3)} × ${f(a1)}`)}
+              ${crResult('', vb(f(dL_dW1),'r'))}
+            </div>`
+    },
+
+    // B5: ∂L/∂w₂⁽²⁾
+    {
+      phase:'backward', title:'Backprop Step 5 — Gradient ∂L/∂w₂⁽²⁾',
+      hn:['node-h2','node-out'], he:['edge-h2-out'],
+      svgUp:[['gv-dW2', '∂L/∂w₂='+f(dL_dW2)]],
+      body:`<div class="eq-line eq-f" style="margin-bottom:0.25rem">
+              Same pattern for <code>w₂⁽²⁾</code> — it enters only through <code>z⁽³⁾</code>, so <code>∂z³/∂w₂⁽²⁾ = a₂⁽²⁾</code>:
+            </div>
+            <div class="chain-rule">
+              ${cr('∂L/∂w₂⁽²⁾', '∂L/∂z⁽³⁾ · ∂z⁽³⁾/∂w₂⁽²⁾', 'chain rule')}
+              ${cr('', 'δ⁽³⁾ · a₂⁽²⁾')}
+              ${cr('', `${f(delta3)} × ${f(a2)}`)}
+              ${crResult('', vb(f(dL_dW2),'r'))}
+            </div>`
+    },
+
+    // B6: δ₁⁽²⁾ — backprop to hidden neuron 1
+    {
+      phase:'backward', title:'Backprop Step 6 — Error signal δ₁⁽²⁾ (hidden neuron 1)',
+      hn:['node-h1'], he:['edge-h1-out'],
+      svgUp:[['gv-delta1', 'δ₁='+f(delta1)]],
+      body:`<div class="eq-line eq-f" style="margin-bottom:0.25rem">
+              The error at <code>a₁⁽²⁾</code> flows back through <code>w₁⁽²⁾</code>, then through the sigmoid at z₁:
+            </div>
+            <div class="chain-rule">
+              ${cr('∂L/∂a₁⁽²⁾', 'δ⁽³⁾ · w₁⁽²⁾', 'error from output')}
+              ${cr('', `${f(delta3)} × ${W.W1} = ${vb(f(dL_da1),'r')}`)}
+              ${cr('σ′(z₁⁽²⁾)', 'a₁(1−a₁)', 'sigmoid derivative')}
+              ${cr('', `${f(a1)} × ${f(1-a1)} = ${vb(f(da1_dz1),'r')}`)}
+              ${cr('δ₁⁽²⁾', '∂L/∂a₁ · σ′(z₁)', 'chain rule')}
+              ${cr('', `${f(dL_da1)} × ${f(da1_dz1)}`)}
+              ${crResult('δ₁⁽²⁾', vb(f(delta1),'r'))}
+            </div>`
+    },
+
+    // B7: δ₂⁽²⁾ — backprop to hidden neuron 2
+    {
+      phase:'backward', title:'Backprop Step 7 — Error signal δ₂⁽²⁾ (hidden neuron 2)',
+      hn:['node-h2'], he:['edge-h2-out'],
+      svgUp:[['gv-delta2', 'δ₂='+f(delta2)]],
+      body:`<div class="eq-line eq-f" style="margin-bottom:0.25rem">
+              Same chain for neuron 2 — error flows back through <code>w₂⁽²⁾</code>:
+            </div>
+            <div class="chain-rule">
+              ${cr('∂L/∂a₂⁽²⁾', 'δ⁽³⁾ · w₂⁽²⁾', 'error from output')}
+              ${cr('', `${f(delta3)} × ${W.W2} = ${vb(f(dL_da2),'r')}`)}
+              ${cr('σ′(z₂⁽²⁾)', 'a₂(1−a₂)', 'sigmoid derivative')}
+              ${cr('', `${f(a2)} × ${f(1-a2)} = ${vb(f(da2_dz2),'r')}`)}
+              ${cr('δ₂⁽²⁾', '∂L/∂a₂ · σ′(z₂)', 'chain rule')}
+              ${cr('', `${f(dL_da2)} × ${f(da2_dz2)}`)}
+              ${crResult('δ₂⁽²⁾', vb(f(delta2),'r'))}
+            </div>`
+    },
+
+    // B8: ∂L/∂w₁⁽¹⁾
+    {
+      phase:'backward', title:'Backprop Step 8 — Gradient ∂L/∂w₁⁽¹⁾',
+      hn:['node-input','node-h1'], he:['edge-x-h1'],
+      svgUp:[['gv-dw1', '∂L/∂w₁='+f(dL_dw1)]],
+      body:`<div class="eq-line eq-f" style="margin-bottom:0.25rem">
+              <code>w₁⁽¹⁾</code> only enters through <code>z₁⁽²⁾ = w₁⁽¹⁾·x + b₁</code>, so <code>∂z₁/∂w₁⁽¹⁾ = x</code>:
+            </div>
+            <div class="chain-rule">
+              ${cr('∂L/∂w₁⁽¹⁾', '∂L/∂z₁⁽²⁾ · ∂z₁⁽²⁾/∂w₁⁽¹⁾', 'chain rule')}
+              ${cr('', 'δ₁⁽²⁾ · x')}
+              ${cr('', `${f(delta1)} × ${X}`)}
+              ${crResult('', vb(f(dL_dw1),'r'))}
+            </div>`
+    },
+
+    // B9: ∂L/∂w₂⁽¹⁾
+    {
+      phase:'backward', title:'Backprop Step 9 — Gradient ∂L/∂w₂⁽¹⁾',
+      hn:['node-input','node-h2'], he:['edge-x-h2'],
+      svgUp:[['gv-dw2', '∂L/∂w₂='+f(dL_dw2)]],
+      body:`<div class="eq-line eq-f" style="margin-bottom:0.25rem">
+              Same for <code>w₂⁽¹⁾</code> — it enters through <code>z₂⁽²⁾ = w₂⁽¹⁾·x + b₂</code>:
+            </div>
+            <div class="chain-rule">
+              ${cr('∂L/∂w₂⁽¹⁾', '∂L/∂z₂⁽²⁾ · ∂z₂⁽²⁾/∂w₂⁽¹⁾', 'chain rule')}
+              ${cr('', 'δ₂⁽²⁾ · x')}
+              ${cr('', `${f(delta2)} × ${X}`)}
+              ${crResult('', vb(f(dL_dw2),'r'))}
+            </div>`
+    },
+
+    // ── WEIGHT UPDATE ─────────────────────────────────────
+    {
+      phase:'update', title:'Weight Update: w ← w − η·∂L/∂w',
+      hn:['node-input','node-h1','node-h2','node-out'], he:['edge-x-h1','edge-x-h2','edge-h1-out','edge-h2-out'],
+      svgUp:[],
+      body:`<div class="eq-line" style="margin-bottom:0.3rem">Rule: <strong>w ← w − η · gradient</strong> &nbsp;(η = ${LR})</div>
+            <div class="eq-line eq-r">w₁⁽¹⁾: ${W.w1} − ${LR}×(${f(dL_dw1)}) = ${vb(f(nw1),'g')}</div>
+            <div class="eq-line eq-r">w₂⁽¹⁾: ${W.w2} − ${LR}×(${f(dL_dw2)}) = ${vb(f(nw2),'g')}</div>
+            <div class="eq-line eq-r">w₁⁽²⁾: ${W.W1} − ${LR}×(${f(dL_dW1)}) = ${vb(f(nW1),'g')}</div>
+            <div class="eq-line eq-r">w₂⁽²⁾: ${W.W2} − ${LR}×(${f(dL_dW2)}) = ${vb(f(nW2),'g')}</div>
+            <div class="eq-line eq-r">b⁽²⁾&nbsp;&nbsp;: ${W.b2} − ${LR}×(${f(dL_db2)}) = ${vb(f(nb2),'g')}</div>
+            <div class="eq-line" style="margin-top:0.4rem;color:#166534;font-weight:600">
+              ✓ One step done. Loss: ${f(loss)} → ${f(nloss)} &nbsp;(reduced by ${f((loss-nloss)/loss*100,1)}%)
+            </div>`
+    },
+  ];
+
+  // ── State ────────────────────────────────────────────
+  let current = 0;
+  const TOTAL = steps.length - 1;
+
+  // Edge default marker
+  const edgeDefaults = {};
+
+  // ── Highlight helpers ─────────────────────────────────
+  function clearHL() {
+    document.querySelectorAll('#ann-svg .hl-fwd, #ann-svg .hl-bwd, #ann-svg .hl-loss, #ann-svg .hl-update')
+      .forEach(el => el.classList.remove('hl-fwd','hl-bwd','hl-loss','hl-update'));
+
+    // Reset edge markers
+    ['edge-x-h1','edge-x-h2','edge-b1-h1','edge-b1-h2',
+     'edge-h1-out','edge-h2-out','edge-b2-out','edge-out-p']
+      .forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.setAttribute('marker-end','url(#arr)');
+      });
+  }
+
+  function applyHL(ids, phase) {
+    const map = { forward:'hl-fwd', backward:'hl-bwd', loss:'hl-loss', update:'hl-update' };
+    const cls = map[phase];
+    if (!cls) return;
+    const mmap = { forward:'arr-fwd', backward:'arr-bwd', update:'arr-upd' };
+    const m = mmap[phase] || 'arr-fwd';
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add(cls);
+      if (el.tagName === 'line') el.setAttribute('marker-end', `url(#${m})`);
+    });
+  }
+
+  // ── Render a step ──────────────────────────────────────
+  function renderStep(n) {
+    current = n;
+    clearHL();
+
+    // Apply all svgUp from steps 0..n (so computed values persist)
+    for (let i = 0; i <= n; i++) {
+      (steps[i].svgUp || []).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      });
+    }
+
+    const s = steps[n];
+    applyHL([...s.hn, ...s.he], s.phase);
+
+    // Update info panel
+    const panel = document.getElementById('step-info');
+    panel.className = `step-info phase-${s.phase}`;
+    document.getElementById('step-title-text').textContent = s.title;
+    const badge = document.getElementById('phase-badge');
+    badge.textContent = s.phase.charAt(0).toUpperCase() + s.phase.slice(1);
+    badge.className = `phase-badge badge-${s.phase}`;
+    document.getElementById('step-body').innerHTML = s.body;
+
+    // Counter
+    document.getElementById('step-ctr').textContent = `Step ${n} / ${TOTAL}`;
+
+    // Buttons
+    document.getElementById('btn-prev').disabled = n === 0;
+    document.getElementById('btn-next').disabled = n === TOTAL;
+    document.getElementById('btn-next').textContent = n === TOTAL ? '✓ Done' : 'Next Step →';
+
+    // Weight display update
+    if (s.phase === 'update') {
+      const vals = [
+        ['wv-w1', f(nw1)], ['wv-w2', f(nw2)],
+        ['wv-W1', f(nW1)], ['wv-W2', f(nW2)], ['wv-b2', f(nb2)]
+      ];
+      vals.forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = val; el.classList.add('updated'); }
+      });
+    } else {
+      ['wv-w1','wv-w2','wv-W1','wv-W2','wv-b2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('updated');
+      });
+    }
+  }
+
+  function changeStep(dir) { renderStep(Math.max(0, Math.min(TOTAL, current + dir))); }
+  function resetSim() {
+    // Reset SVG text values (forward + gradient annotations)
+    ['h1-z-val','h1-a-val','h2-z-val','h2-a-val',
+     'out-z-val','out-a-val','pred-val',
+     'gv-delta3','gv-delta1','gv-delta2',
+     'gv-dW1','gv-dW2','gv-dw1','gv-dw2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = id.startsWith('gv-') ? '' : '—';
+    });
+    // Reset weight display
+    const orig = [['wv-w1','0.5'],['wv-w2','0.3'],['wv-b1a','0.2'],['wv-b1b','0.2'],
+                  ['wv-W1','0.4'],['wv-W2','0.6'],['wv-b2','0.1']];
+    orig.forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = val; el.classList.remove('updated'); }
+    });
+    renderStep(0);
+  }
+
+  // Initial render
+  renderStep(0);
+  </script>
+
+</body>
+</html>

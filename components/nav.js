@@ -22,11 +22,11 @@
         <a href="${base}/index.html" class="nav-logo">
           <!-- Small inline SVG: two nodes connected by an edge — fits the visualizer theme -->
           <svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="5"  cy="10" r="4.5" fill="#1A1A1A" />
-            <circle cx="23" cy="4"  r="4.5" fill="#1A1A1A" />
-            <circle cx="23" cy="16" r="4.5" fill="#1A1A1A" />
-            <line x1="9"  y1="9"  x2="19" y2="5"  stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="9"  y1="11" x2="19" y2="15" stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="5"  cy="10" r="4.5" fill="#E8847A" />
+            <circle cx="23" cy="4"  r="4.5" fill="#ffffff" />
+            <circle cx="23" cy="16" r="4.5" fill="#ffffff" />
+            <line x1="9"  y1="9"  x2="19" y2="5"  stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="9"  y1="11" x2="19" y2="15" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
           <span class="nav-logo-text">AI / ML <span class="nav-logo-accent">Notes</span></span>
         </a>

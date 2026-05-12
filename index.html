@@ -89,8 +89,8 @@
         category: "ai",
         file: "algorithms/ai/search/bfs-dfs-astar.html",
         description: "Uninformed and informed graph search algorithms, step by step.",
-        difficulty: "Beginner",
-        week: "1–2",
+        color: "#E8847A",
+        icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></svg>`,
         done: true,
       },
       {
@@ -99,8 +99,8 @@
         category: "ml",
         file: "algorithms/ml/regression/gradient-descent.html",
         description: "A ball rolling down a loss curve — watch how learning rate controls the descent.",
-        difficulty: "Beginner",
-        week: "5–6",
+        color: "#F6DE74",
+        icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,5 8,14 14,10 22,19"/><polyline points="17,19 22,19 22,14"/></svg>`,
         done: true,
       },
       {
@@ -109,8 +109,8 @@
         category: "ml",
         file: "algorithms/ml/regression/linear-regression.html",
         description: "Least squares line fit and polynomial curve fit, both trained with gradient descent.",
-        difficulty: "Beginner",
-        week: "5–6",
+        color: "#7DD4F5",
+        icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="5" cy="17" r="1.5" fill="currentColor" stroke="none"/><circle cx="9" cy="13" r="1.5" fill="currentColor" stroke="none"/><circle cx="14" cy="10" r="1.5" fill="currentColor" stroke="none"/><circle cx="18" cy="6" r="1.5" fill="currentColor" stroke="none"/><line x1="3" y1="21" x2="21" y2="3"/></svg>`,
         done: true,
       },
       {
@@ -119,8 +119,18 @@
         category: "ml",
         file: "algorithms/ml/regression/logistic-regression.html",
         description: "Sigmoid output and animated decision boundary on a 2-class scatter dataset.",
-        difficulty: "Beginner",
-        week: "5–6",
+        color: "#7DDDB0",
+        icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="6" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="10" cy="8" r="2" fill="currentColor" stroke="none"/><circle cx="14" cy="16" r="2" fill="currentColor" stroke="none"/><circle cx="18" cy="18" r="2" fill="currentColor" stroke="none"/><line x1="12" y1="2" x2="12" y2="22" stroke-dasharray="3 2"/></svg>`,
+        done: true,
+      },
+      {
+        title: "Artificial Neural Network (ANN)",
+        topic: "Deep Learning",
+        category: "ml",
+        file: "algorithms/ml/neural-network/ann.html",
+        description: "Fixed 1→2→1 network. Step through forward pass and backpropagation with color-coded equations.",
+        color: "#F0A85C",
+        icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="4" cy="12" r="2.5" fill="currentColor" stroke="none"/><circle cx="12" cy="5" r="2.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="2.5" fill="currentColor" stroke="none"/><circle cx="20" cy="12" r="2.5" fill="currentColor" stroke="none"/><line x1="6.5" y1="11" x2="9.5" y2="6.5"/><line x1="6.5" y1="13" x2="9.5" y2="17.5"/><line x1="14.5" y1="6.5" x2="17.5" y2="11"/><line x1="14.5" y1="17.5" x2="17.5" y2="13"/></svg>`,
         done: true,
       },
     ];
@@ -134,20 +144,23 @@
 
       grid.innerHTML = list.map(a => `
         <a class="card ${a.done ? '' : 'card--locked'}"
-           href="${a.done ? a.file : undefined}"
-           ${!a.done ? 'aria-disabled="true" tabindex="-1"' : ''}
-           ${a.done ? '' : 'onclick="return false"'}>
+           style="--card-bg: ${a.color}"
+           href="${a.done ? a.file : 'javascript:void(0)'}"
+           ${!a.done ? 'aria-disabled="true" tabindex="-1"' : ''}>
 
-          <div class="card-top">
+          <div class="card-header">
+            <div class="card-icon">${a.icon}</div>
             <span class="card-topic">${a.topic}</span>
-            <span class="badge badge-${a.difficulty.toLowerCase()}">${a.difficulty}</span>
           </div>
 
           <h3 class="card-title">${a.title}</h3>
           <p class="card-desc">${a.description}</p>
 
           <div class="card-cta">
-            ${a.done ? '<span class="card-cta-link">Explore →</span>' : '<span class="card-cta-soon">Coming soon</span>'}
+            ${a.done
+              ? '<span class="card-btn">Explore →</span>'
+              : '<span class="card-btn card-btn--soon">Coming soon</span>'
+            }
           </div>
 
         </a>
